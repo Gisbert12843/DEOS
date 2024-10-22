@@ -394,10 +394,10 @@ PROGRAM(0, AUTOSTART)
 process_id_t os_exec(program_id_t programID, priority_t priority)
 {
 
-	// 1. Enter a critical section
+	//! 1. Enter a critical section
 	os_enterCriticalSection();
 
-	// 2. Find free slot in os_processes array
+	//! 2. Find free slot in os_processes array
 
 	int free_slot = -1;
 
@@ -416,38 +416,52 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
 		return INVALID_PROCESS;
 	}
 
-	// 3. Obtain the respective function pointer
+	//! 3. Obtain the respective function pointer
 	program_t *function = os_lookupProgramFunction(programID);
 
-	// If looked up function pointer is invalid, abort os_exec and return INVALID_PROCESS
+	//! If looked up function pointer is invalid, abort os_exec and return INVALID_PROCESS
 	if (function == NULL)
 	{
 		os_error("Invalid program ID");
 		return INVALID_PROCESS;
 	}
 
-	// 4. Save ProgramID and the process' state (and some more)
+	//! 4. Save ProgramID and the process' state (and some more)
 	os_processes[free_slot].progID = programID;
 	os_processes[free_slot].state = OS_PS_READY;
 	os_processes[free_slot].priority = priority;
 
-	// 5.1 push the address of the function to the stack
-	// Note for task 2: use address of os_dispatcher instead
-
-	// PROCESS_STACK_BOTTOM(programID); // Speicheradresse der ersten (höchsten) freien Speicherstelle des Prozessstacks
-	// stack_pointer_t sp = {as_int: PROCESS_STACK_BOTTOM(programID), as_ptr: PROCESS_STACK_BOTTOM(programID)};
-	// os_processes[free_slot].sp = sp;
-
 	stack_pointer_t sp;
-	sp.as_ptr = (uint8_t *)PROCESS_STACK_BOTTOM(programID);
+	sp.as_ptr = PROCESS_STACK_BOTTOM(programID);
 	sp.as_int = PROCESS_STACK_BOTTOM(programID);
+
+	//! 5.1 push the address of the function to the stack
+	//! Note for task 2: use address of os_dispatcher instead
+
+	uint8_t stackptr_offset = 0; // Offset to keep track of the current stack pointer
+	// we are subtracting the offset since the stack grows upwards into lower addresses
+	// PROCESS_STACK_BOTTOM is the highest (by value) address of the stack
+
+	*(sp.as_ptr - stackptr_offset) = (uint8_t)(addressOfProgram(function) & 0xFF);
+	*(sp.as_ptr - ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 8) & 0xFF);
+	*(sp.as_ptr - ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 16) & 0xFF);
+
+	//! 5.2 leave space on the process stack for register entries
+
+	for (uint8_t i = 0; i < 33; i++)
+	{
+		*(sp.as_ptr - ++stackptr_offset) = 0;
+	}
+
+	sp.as_int -= stackptr_offset; // update the int casted stack pointer to the new value
+
 	os_processes[programID].sp = sp;
 
-	// 5.2 leave space on the process stack for register entries
+	os_leaveCriticalSection();
 
-	// For task 2: Save the stack checksum
+	//! For task 2: Save the stack checksum
 
-	// 6. Leave Critical Section
+	//! 6. Leave Critical Section
 }
 
 /*!
