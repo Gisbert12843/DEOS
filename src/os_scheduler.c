@@ -376,7 +376,16 @@ ISR(TIMER2_COMPA_vect)
  */
 PROGRAM(0, AUTOSTART)
 {
-#warning[Praktikum 1] Implement here
+	while (true)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			lcd_writeChar('.');
+			delayMs(DEFAULT_OUTPUT_DELAY);
+		}
+		lcd_clear();
+		delayMs(DEFAULT_OUTPUT_DELAY);
+	}
 }
 
 /*!
@@ -432,7 +441,7 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
 	os_processes[free_slot].priority = priority;
 
 	stack_pointer_t sp;
-	sp.as_ptr = PROCESS_STACK_BOTTOM(programID);
+	sp.as_ptr = (uint8_t *)PROCESS_STACK_BOTTOM(programID);
 	sp.as_int = PROCESS_STACK_BOTTOM(programID);
 
 	//! 5.1 push the address of the function to the stack
@@ -442,18 +451,16 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
 	// we are subtracting the offset since the stack grows upwards into lower addresses
 	// PROCESS_STACK_BOTTOM is the highest (by value) address of the stack
 
-	*(sp.as_ptr - stackptr_offset) = (uint8_t)(addressOfProgram(function) & 0xFF);
-	*(sp.as_ptr - ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 8) & 0xFF);
-	*(sp.as_ptr - ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 16) & 0xFF);
+	*(sp.as_ptr -= stackptr_offset) = (uint8_t)(addressOfProgram(function) & 0xFF);
+	*(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 8) & 0xFF);
+	*(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 16) & 0xFF);
 
 	//! 5.2 leave space on the process stack for register entries
 
 	for (uint8_t i = 0; i < 33; i++)
 	{
-		*(sp.as_ptr - ++stackptr_offset) = 0;
+		*(sp.as_ptr -= ++stackptr_offset) = 0;
 	}
-
-	sp.as_int -= stackptr_offset; // update the int casted stack pointer to the new value
 
 	os_processes[programID].sp = sp;
 
@@ -462,6 +469,8 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
 	//! For task 2: Save the stack checksum
 
 	//! 6. Leave Critical Section
+
+	return free_slot;
 }
 
 /*!
@@ -475,11 +484,22 @@ void os_initScheduler(void)
 
 	// 1.
 	// As the processes are just being initialized, all slots should be unused so far.
-
-	// Uncomment:
-	// assert(os_programs[0] != NULL, "There is no idle proc");
+	for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
+	{
+		os_processes[i].state = OS_PS_UNUSED;
+	}
 
 	// Start all registered programs, which a flagged as autostart (i.e. call os_exec on them).
+	for (int i = 0; i < MAX_NUMBER_OF_PROGRAMS; i++)
+	{
+		if (os_checkAutostartProgram(i))
+		{
+			os_exec(i, DEFAULT_PRIORITY);
+		}
+	}
+
+	// Uncomment:
+	assert(os_programs[0] != NULL, "There is no idle proc");
 }
 
 /*!
@@ -491,14 +511,23 @@ void os_startScheduler(void)
 #warning[Praktikum 1] Implement here
 
 	// Set currentProc to idle process
+	currentProc = 0;
 
 	// Set the state of the now chosen process to running
+	os_processes[currentProc].state = OS_PS_RUNNING;
+	os_processes[currentProc].sp.as_int = PROCESS_STACK_BOTTOM(0);
+	os_processes[currentProc].priority = OS_PRIO_LOW;
 
 	// Set SP on the stack of the idle process, this will cause the idle process to start running,
 	// as the SP now points onto the idle functions address
+	SP = os_lookupProgramFunction(currentProc);
 
 	// Load initial context and start the idle process
+	restoreContext();
 
+
+	while (true)
+		;
 	// You should never get here, as the scheduler must not terminate
 }
 
