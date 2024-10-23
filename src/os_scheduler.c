@@ -525,7 +525,6 @@ void os_startScheduler(void)
 	// Load initial context and start the idle process
 	restoreContext();
 
-
 	while (true)
 		;
 	// You should never get here, as the scheduler must not terminate
