@@ -388,6 +388,7 @@ PROGRAM(0, AUTOSTART)
 	}
 }
 
+
 /*!
  *  This function is used to execute a program that has been introduced with
  *  os_registerProgram.
@@ -524,7 +525,6 @@ void os_startScheduler(void)
 
 	// Load initial context and start the idle process
 	restoreContext();
-
 
 	while (true)
 		;
