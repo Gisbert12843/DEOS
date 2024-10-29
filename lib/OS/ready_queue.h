@@ -22,9 +22,9 @@
 //! structure used to store processes and additional logic to implement a circular buffer
 typedef struct ready_queue_t
 {
-	process_id_t processes[READY_QUEUE_SIZE];
-	uint8_t head;
-	uint8_t tail;
+  process_id_t processes[READY_QUEUE_SIZE];
+  uint8_t head;
+  uint8_t tail;
 } ready_queue_t;
 
 //! initializes a ready queue to be empty

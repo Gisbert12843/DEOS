@@ -27,7 +27,7 @@ volatile time_t os_coarseSystemTime;
  */
 ISR(TIMER0_COMPA_vect)
 {
-	++os_coarseSystemTime;
+  ++os_coarseSystemTime;
 }
 
 /*!
@@ -35,19 +35,19 @@ ISR(TIMER0_COMPA_vect)
  */
 void initSystemTime(void)
 {
-	os_coarseSystemTime = 0;
+  os_coarseSystemTime = 0;
 
-	// Init timer 0 with prescaler 64
-	sbi(TCCR0B, CS00);
-	sbi(TCCR0B, CS01);
-	cbi(TCCR0B, CS02);
+  // Init timer 0 with prescaler 64
+  sbi(TCCR0B, CS00);
+  sbi(TCCR0B, CS01);
+  cbi(TCCR0B, CS02);
 
-	// CTC mode
-	sbi(TCCR0A, WGM01);
+  // CTC mode
+  sbi(TCCR0A, WGM01);
 
-	// Compare Match after 61 timer ticks = 1ms
-	OCR0A = TIMER_OCR;
-	sbi(TIMSK0, OCIE0A);
+  // Compare Match after 61 timer ticks = 1ms
+  OCR0A = TIMER_OCR;
+  sbi(TIMSK0, OCIE0A);
 }
 
 /*!
@@ -57,24 +57,24 @@ void initSystemTime(void)
  */
 time_t getSystemTime_ms(void)
 {
-	// In case interrupts are off we check the OCF manually, clear it and
-	// increment os_coarseSystemTime to avoid freezing the system time
-	if (!gbi(SREG, 7) && gbi(TIFR0, OCF0A))
-	{
-		sbi(TIFR0, OCF0A);
-		++os_coarseSystemTime;
-	}
+  // In case interrupts are off we check the OCF manually, clear it and
+  // increment os_coarseSystemTime to avoid freezing the system time
+  if (!gbi(SREG, 7) && gbi(TIFR0, OCF0A))
+  {
+    sbi(TIFR0, OCF0A);
+    ++os_coarseSystemTime;
+  }
 
-	// Synchronize access to os_coarseSystemTime
-	uint8_t ie = gbi(SREG, 7);
-	cli();
-	time_t t = os_coarseSystemTime;
-	if (ie)
-	{
-		sei();
-	}
+  // Synchronize access to os_coarseSystemTime
+  uint8_t ie = gbi(SREG, 7);
+  cli();
+  time_t t = os_coarseSystemTime;
+  if (ie)
+  {
+    sei();
+  }
 
-	return t;
+  return t;
 }
 
 /*!
@@ -87,19 +87,19 @@ time_t getSystemTime_ms(void)
 void delayMs(uint16_t ms)
 {
 #ifdef RUNNING_WITH_SIMULATOR
-	return;
+  return;
 #endif
 
-	if (ms == 0)
-	{
-		return;
-	}
-	time_t startTime = getSystemTime_ms();
+  if (ms == 0)
+  {
+    return;
+  }
+  time_t startTime = getSystemTime_ms();
 
-	while (getSystemTime_ms() - startTime < ms)
-	{
-		_delay_us(100);
-	}
+  while (getSystemTime_ms() - startTime < ms)
+  {
+    _delay_us(100);
+  }
 }
 
 /*!
@@ -110,11 +110,11 @@ void delayMs(uint16_t ms)
  */
 void assertPstr(bool exp, const char *errormsg, ...)
 {
-	if (!exp)
-	{
-		va_list args;
-		va_start(args, errormsg);
-		os_errorPstr(PSTR("[ASSERTION FAILED] "), errormsg, args);
-		va_end(args);
-	}
+  if (!exp)
+  {
+    va_list args;
+    va_start(args, errormsg);
+    os_errorPstr(PSTR("[ASSERTION FAILED] "), errormsg, args);
+    va_end(args);
+  }
 }

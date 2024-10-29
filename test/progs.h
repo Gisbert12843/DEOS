@@ -6,7 +6,7 @@
 #define USER_PROGRAM 1
 
 // Will run tests/testx.c
-#define TESTTASK 5
+#define TESTTASK 0
 
 // You don't need to bother what's here
 #if ENABLE_TESTTASK == 1

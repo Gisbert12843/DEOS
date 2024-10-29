@@ -15,44 +15,44 @@
 
 PROGRAM(1, AUTOSTART)
 {
-	rfAdapter_init();
-	while (1)
-	{
-		rfAdapter_worker();
-	}
+  rfAdapter_init();
+  while (1)
+  {
+    rfAdapter_worker();
+  }
 }
 
 PROGRAM(2, AUTOSTART)
 {
-	lcd_writeProgString(PSTR("Waiting... "));
+  lcd_writeProgString(PSTR("Waiting... "));
 
-	while (1)
-	{
-		buttons_waitForPressed(BTN_LEFT);
-		rfAdapter_sendLcdClear(PARTNER_ADDRESS);
-		rfAdapter_sendLcdPrintProcMem(PARTNER_ADDRESS, PSTR("Hallo "));
-		rfAdapter_sendSetLed(PARTNER_ADDRESS, true);
-		lcd_writeChar('>');
+  while (1)
+  {
+    buttons_waitForPressed(BTN_LEFT);
+    rfAdapter_sendLcdClear(PARTNER_ADDRESS);
+    rfAdapter_sendLcdPrintProcMem(PARTNER_ADDRESS, PSTR("Hallo "));
+    rfAdapter_sendSetLed(PARTNER_ADDRESS, true);
+    lcd_writeChar('>');
 
-		buttons_waitForReleased(BTN_LEFT);
-		rfAdapter_sendSetLed(PARTNER_ADDRESS, false);
-		lcd_writeChar('>');
-	}
+    buttons_waitForReleased(BTN_LEFT);
+    rfAdapter_sendSetLed(PARTNER_ADDRESS, false);
+    lcd_writeChar('>');
+  }
 }
 
 PROGRAM(3, AUTOSTART)
 {
-	while (1)
-	{
-		buttons_waitForPressed(BTN_RIGHT);
-		rfAdapter_sendLcdPrintProcMem(PARTNER_ADDRESS, PSTR("DEOS"));
-		rfAdapter_sendSetLed(PARTNER_ADDRESS, true);
-		lcd_writeChar('>');
+  while (1)
+  {
+    buttons_waitForPressed(BTN_RIGHT);
+    rfAdapter_sendLcdPrintProcMem(PARTNER_ADDRESS, PSTR("DEOS"));
+    rfAdapter_sendSetLed(PARTNER_ADDRESS, true);
+    lcd_writeChar('>');
 
-		buttons_waitForReleased(BTN_RIGHT);
-		rfAdapter_sendSetLed(PARTNER_ADDRESS, false);
-		lcd_writeChar('>');
-	}
+    buttons_waitForReleased(BTN_RIGHT);
+    rfAdapter_sendSetLed(PARTNER_ADDRESS, false);
+    lcd_writeChar('>');
+  }
 }
 
 #endif

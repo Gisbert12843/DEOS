@@ -18,7 +18,7 @@
 //! Structure used to store specific scheduling informations
 typedef struct SchedulingInformation
 {
-	ready_queue_t queues_ready[PRIORITY_COUNT];
+  ready_queue_t queues_ready[PRIORITY_COUNT];
 } scheduling_information_t;
 
 //! Used to reset the SchedulingInfo for one process

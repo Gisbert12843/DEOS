@@ -19,15 +19,15 @@ uint8_t dummy[512];
 
 PROGRAM(1, AUTOSTART)
 {
-	// Write something into the memory block to prevent omission at compile time.
-	dummy[0] = 'A';
-	dummy[sizeof(dummy) - 1] = 'B';
+  // Write something into the memory block to prevent omission at compile time.
+  dummy[0] = 'A';
+  dummy[sizeof(dummy) - 1] = 'B';
 
-	lcd_clear();
-	lcd_writeProgString(PSTR("OK if error"));
+  lcd_clear();
+  lcd_writeProgString(PSTR("OK if error"));
 
-	while (1)
-		;
+  while (1)
+    ;
 }
 
 #endif

@@ -11,18 +11,28 @@
 //! Program's entry point
 int main(void)
 {
-	// Give the operating system a chance to initialize its private data.
-	// This also registers and starts the idle program.
-	os_init();
-  
-	
-	// os_init shows a boot message
-	// Wait and clear the LCD
-	delayMs(600);
-	lcd_clear();
+  // Give the operating system a chance to initialize its private data.
+  // This also registers and starts the idle program.
+  os_init();
 
-	// Start the operating system
-	os_startScheduler();
+  // os_init shows a boot message
+  // Wait and clear the LCD
+  delayMs(1000);
+  lcd_clear();
 
-	return 1;
+  // while (true)
+  // {
+  //   lcd_clear();
+  //   printf("lcd cleared");
+
+  //   delayMs(1000);
+  //   lcd_writeString("OS started");
+  //   printf("OS started");
+  //   delayMs(1000);
+  // }
+
+  // Start the operating system
+  os_startScheduler();
+
+  return 1;
 }

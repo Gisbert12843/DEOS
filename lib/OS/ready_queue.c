@@ -12,8 +12,8 @@
  */
 void rq_init(ready_queue_t *queue)
 {
-	queue->head = 0;
-	queue->tail = 0;
+  queue->head = 0;
+  queue->tail = 0;
 }
 
 /*!
@@ -24,12 +24,12 @@ void rq_init(ready_queue_t *queue)
  */
 void rq_push(ready_queue_t *queue, process_id_t process)
 {
-	if (rq_isFull(queue))
-	{
-		os_error("Can't push on full ready queue");
-	}
-	queue->processes[queue->tail] = process;
-	queue->tail = next(queue->tail);
+  if (rq_isFull(queue))
+  {
+    os_error("Can't push on full ready queue");
+  }
+  queue->processes[queue->tail] = process;
+  queue->tail = next(queue->tail);
 }
 
 /*!
@@ -41,13 +41,13 @@ void rq_push(ready_queue_t *queue, process_id_t process)
  */
 process_id_t rq_pop(ready_queue_t *queue)
 {
-	if (rq_isEmpty(queue))
-	{
-		os_error("Can't pop from empty ready queue");
-	}
-	process_id_t process = queue->processes[queue->head];
-	queue->head = next(queue->head);
-	return process;
+  if (rq_isEmpty(queue))
+  {
+    os_error("Can't pop from empty ready queue");
+  }
+  process_id_t process = queue->processes[queue->head];
+  queue->head = next(queue->head);
+  return process;
 }
 
 /*!
@@ -58,7 +58,7 @@ process_id_t rq_pop(ready_queue_t *queue)
  */
 bool rq_isEmpty(ready_queue_t *queue)
 {
-	return queue->head == queue->tail;
+  return queue->head == queue->tail;
 }
 
 /*!
@@ -69,7 +69,7 @@ bool rq_isEmpty(ready_queue_t *queue)
  */
 bool rq_isFull(ready_queue_t *queue)
 {
-	return next(queue->tail) == queue->head;
+  return next(queue->tail) == queue->head;
 }
 
 /*!
@@ -79,8 +79,8 @@ bool rq_isFull(ready_queue_t *queue)
  */
 void rq_clear(ready_queue_t *queue)
 {
-	queue->head = 0;
-	queue->tail = 0;
+  queue->head = 0;
+  queue->tail = 0;
 }
 
 /*!
@@ -93,19 +93,19 @@ void rq_clear(ready_queue_t *queue)
  */
 bool rq_remove(ready_queue_t *queue, process_id_t process)
 {
-	for (int i = queue->head; i != queue->tail; i = next(i))
-	{
-		if (queue->processes[i] == process)
-		{
-			for (int j = i; j != queue->tail; j = next(j))
-			{
-				queue->processes[j] = queue->processes[next(j)];
-			}
-			queue->tail = prev(queue->tail);
-			return true;
-		}
-	}
-	return false;
+  for (int i = queue->head; i != queue->tail; i = next(i))
+  {
+    if (queue->processes[i] == process)
+    {
+      for (int j = i; j != queue->tail; j = next(j))
+      {
+        queue->processes[j] = queue->processes[next(j)];
+      }
+      queue->tail = prev(queue->tail);
+      return true;
+    }
+  }
+  return false;
 }
 
 /*!
@@ -116,12 +116,12 @@ bool rq_remove(ready_queue_t *queue, process_id_t process)
  */
 void rq_print(ready_queue_t *queue)
 {
-	for (int j = queue->head; j != queue->tail; j = next(j))
-	{
-		lcd_writeDec(queue->processes[j]);
-		if (next(j) != queue->tail)
-		{
-			lcd_writeProgString(PSTR(", "));
-		}
-	}
+  for (int j = queue->head; j != queue->tail; j = next(j))
+  {
+    lcd_writeDec(queue->processes[j]);
+    if (next(j) != queue->tail)
+    {
+      lcd_writeProgString(PSTR(", "));
+    }
+  }
 }

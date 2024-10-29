@@ -5,7 +5,6 @@
  *  \date     2024
  *  \version  1.0
  */
-
 #ifndef _BUTTONS_H_
 #define _BUTTONS_H_
 
@@ -13,12 +12,12 @@
 
 typedef enum Button
 {
-	BTN_RIGHT,
-	BTN_UP,
-	BTN_DOWN,
-	BTN_LEFT,
-	BTN_SELECT,
-	BTN_NONE
+  BTN_RIGHT,
+  BTN_UP,
+  BTN_DOWN,
+  BTN_LEFT,
+  BTN_SELECT,
+  BTN_NONE
 } button_t;
 
 //! Read the button that is currently pressed
@@ -30,7 +29,7 @@ bool buttons_pressed(button_t button);
 //! Check if button got released.
 bool buttons_released(button_t button);
 
-//! Blocks until button at PC0 got pressed
+//! Blocks until button got pressed
 void buttons_waitForPressed(button_t button);
 
 //! Blocks until button got released

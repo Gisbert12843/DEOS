@@ -33,18 +33,18 @@ scheduling_information_t schedulingInfo; // initialization to 0 fits our needs
  */
 bool isAnyProcReady(process_t const processes[])
 {
-	process_id_t i;
-	for (i = 1; i < MAX_NUMBER_OF_PROCESSES; i++)
-	{
-		// The moment we find a single process that is ready/running, we can already return True
-		if (processes[i].state == OS_PS_READY)
-		{
-			return true;
-		}
-	}
+  process_id_t i;
+  for (i = 1; i < MAX_NUMBER_OF_PROCESSES; i++)
+  {
+    // The moment we find a single process that is ready/running, we can already return True
+    if (processes[i].state == OS_PS_READY)
+    {
+      return true;
+    }
+  }
 
-	// Not a single process that is ready/running has been found in the loop, so there is none
-	return false;
+  // Not a single process that is ready/running has been found in the loop, so there is none
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -63,13 +63,21 @@ bool isAnyProcReady(process_t const processes[])
  */
 process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t current)
 {
-#warning[Praktikum 1] Implement here
+  os_setSchedulingStrategy(OS_SS_ROUND_ROBIN);
 
-	// If no process except idle process ready, choose idle process
+  process_id_t currentProc = os_getCurrentProc();
 
-	// Look for the next proc that is ready, there has to be at least one, this has been checked before. Don't choose 0 as it is the idle process
+  // Look for the next proc that is ready, there has to be at least one, this has been checked before. Don't choose 0 as it is the idle process
+  for (uint8_t i = currentProc; i < MAX_NUMBER_OF_PROCESSES; i++)
+  {
+    if (processes[i].state == OS_PS_READY)
+    {
+      return i; // Return resulting process id
+    }
+  }
 
-	// Return resulting process id
+  // If no process except idle process ready, choose idle process
+  return 0; // Return resulting process id
 }
 
 /*!
@@ -108,9 +116,9 @@ process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[],
 {
 #warning[Praktikum 2] Implement here
 
-	// 1. Move processes one higher in priority
+  // 1. Move processes one higher in priority
 
-	// 2. Push current process to the ready queue
+  // 2. Push current process to the ready queue
 
-	// 3. Get next process from ready queue
+  // 3. Get next process from ready queue
 }

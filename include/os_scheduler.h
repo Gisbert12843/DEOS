@@ -23,8 +23,8 @@
 //! The enum specifying which scheduling strategies exist
 typedef enum SchedulingStrategy
 {
-	OS_SS_ROUND_ROBIN,
-	OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN
+  OS_SS_ROUND_ROBIN,
+  OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN
 } scheduling_strategy_t;
 
 // Change this define to reflect the number of available strategies:

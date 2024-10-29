@@ -65,7 +65,7 @@ uint32_t addressOfProgram(program_t program)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-	return (uint32_t)program;
+  return (uint32_t)program;
 #pragma GCC diagnostic pop
 }
 
@@ -81,34 +81,34 @@ uint32_t addressOfProgram(program_t program)
 program_id_t os_registerProgram(program_t *program)
 {
 
-	// Just check if idle-proc has been registered already
-	assert(os_programs[0] != NULL, "Idle Proc not yet registered");
+  // Just check if idle-proc has been registered already
+  assert(os_programs[0] != NULL, "Idle Proc not yet registered");
 
-	uint8_t i = 0;
+  uint8_t i = 0;
 
-	// Check if the program is already registered and if yes, return the respective array slot
-	for (; i < MAX_NUMBER_OF_PROGRAMS; i++)
-	{
-		if (program == os_programs[i])
-		{
-			return i;
-		}
-	}
+  // Check if the program is already registered and if yes, return the respective array slot
+  for (; i < MAX_NUMBER_OF_PROGRAMS; i++)
+  {
+    if (program == os_programs[i])
+    {
+      return i;
+    }
+  }
 
-	// If program is not yet registered...
-	// Look for first free slot within os_programs array
-	// Note that we start at 1, because this fct. is not used to register the idle proc
-	for (i = 1; i < MAX_NUMBER_OF_PROGRAMS; i++)
-	{
-		if (os_programs[i] == NULL)
-		{
-			os_programs[i] = program;
-			return i;
-		}
-	}
+  // If program is not yet registered...
+  // Look for first free slot within os_programs array
+  // Note that we start at 1, because this fct. is not used to register the idle proc
+  for (i = 1; i < MAX_NUMBER_OF_PROGRAMS; i++)
+  {
+    if (os_programs[i] == NULL)
+    {
+      os_programs[i] = program;
+      return i;
+    }
+  }
 
-	// If the program is neither registered already nor is there a free slot, return INVALID_PROGRAM as an error indication
-	return INVALID_PROGRAM;
+  // If the program is neither registered already nor is there a free slot, return INVALID_PROGRAM as an error indication
+  return INVALID_PROGRAM;
 }
 
 /*!
@@ -120,7 +120,7 @@ program_id_t os_registerProgram(program_t *program)
  */
 bool os_checkAutostartProgram(program_id_t programID)
 {
-	return (bool)(os_autostart & (1 << programID));
+  return (bool)(os_autostart & (1 << programID));
 }
 
 /*!
@@ -131,14 +131,14 @@ bool os_checkAutostartProgram(program_id_t programID)
  */
 program_t *os_lookupProgramFunction(program_id_t programID)
 {
-	// If the function pointer is null or the programID is invalid (i.e. too high)...
-	if (programID >= MAX_NUMBER_OF_PROGRAMS)
-	{
-		return NULL;
-	}
+  // If the function pointer is null or the programID is invalid (i.e. too high)...
+  if (programID >= MAX_NUMBER_OF_PROGRAMS)
+  {
+    return NULL;
+  }
 
-	// Else just return the respective function pointer
-	return os_programs[programID];
+  // Else just return the respective function pointer
+  return os_programs[programID];
 }
 
 /*!
@@ -149,18 +149,18 @@ program_t *os_lookupProgramFunction(program_id_t programID)
  */
 program_id_t os_lookupProgramID(program_t *program)
 {
-	// Search program array for a match
-	program_id_t i = 0;
-	for (; i < MAX_NUMBER_OF_PROGRAMS; i++)
-	{
-		if (os_programs[i] == program)
-		{
-			return i;
-		}
-	}
+  // Search program array for a match
+  program_id_t i = 0;
+  for (; i < MAX_NUMBER_OF_PROGRAMS; i++)
+  {
+    if (os_programs[i] == program)
+    {
+      return i;
+    }
+  }
 
-	// If no match was found return INVALID_PROGRAM
-	return INVALID_PROGRAM;
+  // If no match was found return INVALID_PROGRAM
+  return INVALID_PROGRAM;
 }
 
 /*!
@@ -171,7 +171,7 @@ program_id_t os_lookupProgramID(program_t *program)
  */
 process_t *os_getProcessSlot(process_id_t pid)
 {
-	return os_processes + pid;
+  return os_processes + pid;
 }
 
 /*!
@@ -182,7 +182,7 @@ process_t *os_getProcessSlot(process_id_t pid)
  */
 program_t **os_getProgramSlot(program_id_t programID)
 {
-	return os_programs + programID;
+  return os_programs + programID;
 }
 
 /*!
@@ -192,7 +192,7 @@ program_t **os_getProgramSlot(program_id_t programID)
  */
 process_id_t os_getCurrentProc(void)
 {
-	return currentProc;
+  return currentProc;
 }
 
 /*!
@@ -202,15 +202,15 @@ process_id_t os_getCurrentProc(void)
  */
 uint8_t os_getNumberOfActiveProcs(void)
 {
-	uint8_t num = 0;
+  uint8_t num = 0;
 
-	process_id_t i = 0;
-	do
-	{
-		num += os_getProcessSlot(i)->state != OS_PS_UNUSED;
-	} while (++i < MAX_NUMBER_OF_PROCESSES);
+  process_id_t i = 0;
+  do
+  {
+    num += os_getProcessSlot(i)->state != OS_PS_UNUSED;
+  } while (++i < MAX_NUMBER_OF_PROCESSES);
 
-	return num;
+  return num;
 }
 
 /*!
@@ -220,11 +220,11 @@ uint8_t os_getNumberOfActiveProcs(void)
  */
 uint8_t os_getNumberOfRegisteredPrograms(void)
 {
-	uint8_t i;
-	for (i = 0; i < MAX_NUMBER_OF_PROGRAMS && *(os_getProgramSlot(i)); i++)
-		;
-	// Note that this only works because programs cannot be unregistered.
-	return i;
+  uint8_t i;
+  for (i = 0; i < MAX_NUMBER_OF_PROGRAMS && *(os_getProgramSlot(i)); i++)
+    ;
+  // Note that this only works because programs cannot be unregistered.
+  return i;
 }
 
 /*!
@@ -234,8 +234,8 @@ uint8_t os_getNumberOfRegisteredPrograms(void)
  */
 void os_setSchedulingStrategy(scheduling_strategy_t strategy)
 {
-	os_resetSchedulingInformation(strategy);
-	currSchedStrat = strategy;
+  os_resetSchedulingInformation(strategy);
+  currSchedStrat = strategy;
 }
 
 /*!
@@ -245,7 +245,7 @@ void os_setSchedulingStrategy(scheduling_strategy_t strategy)
  */
 scheduling_strategy_t os_getSchedulingStrategy(void)
 {
-	return currSchedStrat;
+  return currSchedStrat;
 }
 
 /*!
@@ -257,33 +257,33 @@ scheduling_strategy_t os_getSchedulingStrategy(void)
  */
 void os_enterCriticalSection(void)
 {
-	// 1. Save global interrupt enable bit in local variable
-	uint8_t ie = gbi(SREG, 7);
+  // 1. Save global interrupt enable bit in local variable
+  uint8_t ie = gbi(SREG, 7);
 
-	// 2. Disable global interrupts (could also be done by sth. like SREG &=...)
-	cli();
+  // 2. Disable global interrupts (could also be done by sth. like SREG &=...)
+  cli();
 
-	// 3. Increment nesting depth of critical sections
-	// Throw error if there are already too many critical sections entered
-	// Note that it might be necessary to check for ==254 if os_error opens another critical section (not the case here...)
-	if (criticalSectionCount == 255)
-	{
-		os_error("Crit. Section   overflow");
-	}
-	else
-	{
-		criticalSectionCount++;
-	}
+  // 3. Increment nesting depth of critical sections
+  // Throw error if there are already too many critical sections entered
+  // Note that it might be necessary to check for ==254 if os_error opens another critical section (not the case here...)
+  if (criticalSectionCount == 255)
+  {
+    os_error("Crit. Section   overflow");
+  }
+  else
+  {
+    criticalSectionCount++;
+  }
 
-	// 4. Deactivate OCIE2A bit in TIMSK2 register to deactivate the TIMER2_COMPA_vect interrupt (i.e. our scheduler)
-	cbi(TIMSK2, OCIE2A);
+  // 4. Deactivate OCIE2A bit in TIMSK2 register to deactivate the TIMER2_COMPA_vect interrupt (i.e. our scheduler)
+  cbi(TIMSK2, OCIE2A);
 
-	// 5. Restore global interrupt enable bit: if it was disabled, nothing happens
-	// If it was enabled, this operation does the same thing as "sei()"
-	if (ie)
-	{
-		sei();
-	}
+  // 5. Restore global interrupt enable bit: if it was disabled, nothing happens
+  // If it was enabled, this operation does the same thing as "sei()"
+  if (ie)
+  {
+    sei();
+  }
 }
 
 /*!
@@ -294,35 +294,35 @@ void os_enterCriticalSection(void)
  */
 void os_leaveCriticalSection(void)
 {
-	// 1. Save global interrupt enable bit in local variable
-	uint8_t ie = gbi(SREG, 7);
+  // 1. Save global interrupt enable bit in local variable
+  uint8_t ie = gbi(SREG, 7);
 
-	// 2. Disable global interrupts (could also be done by sth. like SREG &=...)
-	cli();
+  // 2. Disable global interrupts (could also be done by sth. like SREG &=...)
+  cli();
 
-	// 3. Decrement nesting depth of critical sections
-	// Throw error if there is no critical Section that could be left
-	if (criticalSectionCount == 0)
-	{
-		os_error("Crit. Section   underflow");
-	}
-	else
-	{
-		criticalSectionCount--;
-	}
+  // 3. Decrement nesting depth of critical sections
+  // Throw error if there is no critical Section that could be left
+  if (criticalSectionCount == 0)
+  {
+    os_error("Crit. Section   underflow");
+  }
+  else
+  {
+    criticalSectionCount--;
+  }
 
-	// 4. Activate OCIE2A bit in TIMSK2 register if the last opened critical section is about to be closed
-	if (criticalSectionCount == 0)
-	{
-		sbi(TIMSK2, OCIE2A);
-	}
+  // 4. Activate OCIE2A bit in TIMSK2 register if the last opened critical section is about to be closed
+  if (criticalSectionCount == 0)
+  {
+    sbi(TIMSK2, OCIE2A);
+  }
 
-	// 5. Restore global interrupt enable bit: if it was disabled, nothing happens
-	// If it was enabled, this operation does the same thing as "sei()"
-	if (ie)
-	{
-		sei();
-	}
+  // 5. Restore global interrupt enable bit: if it was disabled, nothing happens
+  // If it was enabled, this operation does the same thing as "sei()"
+  if (ie)
+  {
+    sei();
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -338,36 +338,61 @@ void os_leaveCriticalSection(void)
  */
 ISR(TIMER2_COMPA_vect)
 {
-#warning[Praktikum 1] Implement here
 
-	// 1. Is implicitly done
+  // 1. Is implicitly done
 
-	// 2. Save runtime-context of recently current process using the well-known macro
+  // 2. Save runtime-context of recently current process using the well-known macro
+  saveContext();
 
-	// 3. Save stack pointer of current process
+  uint8_t currentProc = os_getCurrentProc();
 
-	// 4. Set stack pointer onto ISR-Stack
+  // 3. Save stack pointer of current process
+  os_processes[currentProc].sp.as_int = SP;
 
-	// 5. Set process state to ready
-	// Note for task 2: Only set to ready if it is currently running because of os_kill
+  // 4. Set stack pointer onto ISR-Stack
+  SP = BOTTOM_OF_ISR_STACK;
 
-	// In task 2: Save the processes stack checksum
+  // 5. Set process state to ready
+  if (os_processes[currentProc].state == OS_PS_RUNNING)
+  {
+    os_processes[currentProc].state = OS_PS_READY;
+  }
+  // Note for task 2: Only set to ready if it is currently running because of os_kill
 
-	// In task 2: Check if the stack pointer has an invalid value
+  // In task 2: Save the processes stack checksum
 
-	// 6. Find next process using the set scheduling strategy
+  // In task 2: Check if the stack pointer has an invalid value
 
-	// In task 2: Check if the checksum changed since the process was interrupted
+  // 6. Find next process using the set scheduling strategy
+  process_id_t nextProc;
 
-	// 7. Set the state of the now chosen process to running
+  switch (os_getSchedulingStrategy())
+  {
+  case OS_SS_ROUND_ROBIN:
+    nextProc = os_scheduler_RoundRobin(os_processes, currentProc);
+    break;
+  case OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN:
+    nextProc = os_scheduler_DynamicPriorityRoundRobin(os_processes, currentProc);
+    break;
 
-	// 8. Set SP to where it was when the resuming process was interrupted
+  default:
+    nextProc = INVALID_PROCESS;
+    break;
+  }
 
-	// 9. Restore runtime context using the well-known macro.
-	// This will cause the process to continue where it was interrupted.
-	// Any code after the macro won't be executed as it has an reti() instruction at the end.
+  // In task 2: Check if the checksum changed since the process was interrupted
 
-	// 10. Return is implicit through restoreContext()
+  // 7. Set the state of the now chosen process to running
+  os_processes[nextProc].state = OS_PS_RUNNING;
+
+  // 8. Set SP to where it was when the resuming process was interrupted
+  SP = os_processes[nextProc].sp.as_int;
+
+  // 9. Restore runtime context using the well-known macro.
+  // This will cause the process to continue where it was interrupted.
+  // Any code after the macro won't be executed as it has an reti() instruction at the end.
+  // Return is implicit through restoreContext()
+  restoreContext();
 }
 
 /*!
@@ -376,18 +401,17 @@ ISR(TIMER2_COMPA_vect)
  */
 PROGRAM(0, AUTOSTART)
 {
-	while (true)
-	{
-		for (int i = 0; i < 3; i++)
-		{
-			lcd_writeChar('.');
-			delayMs(DEFAULT_OUTPUT_DELAY);
-		}
-		lcd_clear();
-		delayMs(DEFAULT_OUTPUT_DELAY);
-	}
+  while (true)
+  {
+    for (int i = 0; i < 3; i++)
+    {
+      lcd_writeChar('.');
+      delayMs(DEFAULT_OUTPUT_DELAY);
+    }
+    lcd_clear();
+    delayMs(DEFAULT_OUTPUT_DELAY);
+  }
 }
-
 
 /*!
  *  This function is used to execute a program that has been introduced with
@@ -403,75 +427,66 @@ PROGRAM(0, AUTOSTART)
  */
 process_id_t os_exec(program_id_t programID, priority_t priority)
 {
+  // 1. Enter a critical section
+  os_enterCriticalSection();
 
-	//! 1. Enter a critical section
-	os_enterCriticalSection();
+  // 2. Find free slot in os_processes array
+  int free_slot = -1;
+  for (int i = 0; i < sizeof(os_processes) / sizeof(process_t); i++)
+  {
+    if (os_processes[i].state == OS_PS_UNUSED)
+    {
+      free_slot = i;
+      break;
+    }
+  }
 
-	//! 2. Find free slot in os_processes array
+  if (free_slot == -1)
+  {
+    os_error("No free slot available");
+    os_leaveCriticalSection();
+    return INVALID_PROCESS;
+  }
 
-	int free_slot = -1;
+  // 3. Obtain the respective function pointer
+  program_t *function = os_lookupProgramFunction(programID);
 
-	for (int i = 0; i < sizeof(os_processes) / sizeof(process_t); i++)
-	{
-		if (os_processes[i].state == OS_PS_UNUSED)
-		{
-			free_slot = i;
-			break;
-		}
-	}
+  // If looked up function pointer is invalid, abort os_exec and return INVALID_PROCESS
+  if (function == NULL)
+  {
+    os_error("Invalid program ID");
+    os_leaveCriticalSection();
+    return INVALID_PROCESS;
+  }
 
-	if (free_slot == -1)
-	{
-		os_error("No free slot available");
-		return INVALID_PROCESS;
-	}
+  // 4. Save ProgramID and the process' state (and some more)
+  os_processes[free_slot].progID = programID;
+  os_processes[free_slot].state = OS_PS_READY;
+  os_processes[free_slot].priority = priority;
 
-	//! 3. Obtain the respective function pointer
-	program_t *function = os_lookupProgramFunction(programID);
+  // Initialize the stack pointer
+  stack_pointer_t sp;
+  sp.as_ptr = (uint8_t *)PROCESS_STACK_BOTTOM(free_slot);
+  sp.as_int = PROCESS_STACK_BOTTOM(free_slot);
 
-	//! If looked up function pointer is invalid, abort os_exec and return INVALID_PROCESS
-	if (function == NULL)
-	{
-		os_error("Invalid program ID");
-		return INVALID_PROCESS;
-	}
+  // 5.1 push the address of the function to the stack
+  uint8_t stackptr_offset = 0;
+  *(sp.as_ptr -= stackptr_offset) = (uint8_t)(addressOfProgram(function) & 0xFF);
+  *(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 8) & 0xFF);
+  *(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 16) & 0xFF);
 
-	//! 4. Save ProgramID and the process' state (and some more)
-	os_processes[free_slot].progID = programID;
-	os_processes[free_slot].state = OS_PS_READY;
-	os_processes[free_slot].priority = priority;
+  // 5.2 leave space on the process stack for register entries
+  for (uint8_t i = 0; i < 33; i++)
+  {
+    *(sp.as_ptr -= ++stackptr_offset) = 0;
+  }
 
-	stack_pointer_t sp;
-	sp.as_ptr = (uint8_t *)PROCESS_STACK_BOTTOM(programID);
-	sp.as_int = PROCESS_STACK_BOTTOM(programID);
+  os_processes[free_slot].sp = sp;
 
-	//! 5.1 push the address of the function to the stack
-	//! Note for task 2: use address of os_dispatcher instead
+  // 6. Leave Critical Section
+  os_leaveCriticalSection();
 
-	uint8_t stackptr_offset = 0; // Offset to keep track of the current stack pointer
-	// we are subtracting the offset since the stack grows upwards into lower addresses
-	// PROCESS_STACK_BOTTOM is the highest (by value) address of the stack
-
-	*(sp.as_ptr -= stackptr_offset) = (uint8_t)(addressOfProgram(function) & 0xFF);
-	*(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 8) & 0xFF);
-	*(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 16) & 0xFF);
-
-	//! 5.2 leave space on the process stack for register entries
-
-	for (uint8_t i = 0; i < 33; i++)
-	{
-		*(sp.as_ptr -= ++stackptr_offset) = 0;
-	}
-
-	os_processes[programID].sp = sp;
-
-	os_leaveCriticalSection();
-
-	//! For task 2: Save the stack checksum
-
-	//! 6. Leave Critical Section
-
-	return free_slot;
+  return free_slot;
 }
 
 /*!
@@ -481,26 +496,24 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
  */
 void os_initScheduler(void)
 {
-#warning[Praktikum 1] Implement here
+  // 1.
+  // As the processes are just being initialized, all slots should be unused so far.
+  for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
+  {
+    os_processes[i].state = OS_PS_UNUSED;
+  }
 
-	// 1.
-	// As the processes are just being initialized, all slots should be unused so far.
-	for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
-	{
-		os_processes[i].state = OS_PS_UNUSED;
-	}
+  // Start all registered programs, which a flagged as autostart (i.e. call os_exec on them).
+  for (int i = 0; i < MAX_NUMBER_OF_PROGRAMS; i++)
+  {
+    if (os_checkAutostartProgram(i))
+    {
+      os_exec(i, DEFAULT_PRIORITY);
+    }
+  }
 
-	// Start all registered programs, which a flagged as autostart (i.e. call os_exec on them).
-	for (int i = 0; i < MAX_NUMBER_OF_PROGRAMS; i++)
-	{
-		if (os_checkAutostartProgram(i))
-		{
-			os_exec(i, DEFAULT_PRIORITY);
-		}
-	}
-
-	// Uncomment:
-	assert(os_programs[0] != NULL, "There is no idle proc");
+  // Uncomment:
+  assert(os_programs[0] != NULL, "There is no idle proc");
 }
 
 /*!
@@ -509,26 +522,24 @@ void os_initScheduler(void)
  */
 void os_startScheduler(void)
 {
-#warning[Praktikum 1] Implement here
 
-	// Set currentProc to idle process
-	currentProc = 0;
+  // Set currentProc to idle process
+  currentProc = 0;
 
-	// Set the state of the now chosen process to running
-	os_processes[currentProc].state = OS_PS_RUNNING;
-	os_processes[currentProc].sp.as_int = PROCESS_STACK_BOTTOM(0);
-	os_processes[currentProc].priority = OS_PRIO_LOW;
+  // Set the state of the now chosen process to running
+  os_processes[currentProc].state = OS_PS_RUNNING;
+  os_processes[currentProc].sp.as_int = PROCESS_STACK_BOTTOM(0);
+  os_processes[currentProc].priority = OS_PRIO_LOW;
 
-	// Set SP on the stack of the idle process, this will cause the idle process to start running,
-	// as the SP now points onto the idle functions address
-	SP = os_lookupProgramFunction(currentProc);
+  // Set SP on the stack of the idle process, this will cause the idle process to start running,
+  // as the SP now points onto the idle functions address
+  SP = (int)os_lookupProgramFunction(currentProc);
 
-	// Load initial context and start the idle process
-	restoreContext();
+  // Load initial context and start the idle process
+  restoreContext();
 
-	while (true)
-		;
-	// You should never get here, as the scheduler must not terminate
+  os_error("os_startScheduler() terminated against all odds - scary stuff...");
+  // You should never get here, as the scheduler must not terminate
 }
 
 /*!
@@ -542,8 +553,8 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
 {
 #warning[Praktikum 2] Implement here
 
-	// Be aware of cases where the whole stack is less than 10 bytes
-	// (although this actually won't happen due to the call to saveContext() beforehand, which always puts 33 bytes on to the stack already)
+  // Be aware of cases where the whole stack is less than 10 bytes
+  // (although this actually won't happen due to the call to saveContext() beforehand, which always puts 33 bytes on to the stack already)
 }
 
 /*!
@@ -575,21 +586,21 @@ void os_dispatcher()
 {
 #warning[Praktikum 2] Implement here
 
-	// 1. Happens in os_exec
+  // 1. Happens in os_exec
 
-	// 2.
+  // 2.
 
-	// 3.
-	// This obviously must be outside of a critical section so the scheduler can do its job while the process is running
+  // 3.
+  // This obviously must be outside of a critical section so the scheduler can do its job while the process is running
 
-	// 4. Happens implicitly
+  // 4. Happens implicitly
 
-	// 5.
-	// Try to kill the terminating process
+  // 5.
+  // Try to kill the terminating process
 
-	// 6.
-	// Wait for scheduler to fetch another process
-	// Note that this process will not be fetched anymore as we cleaned up the corresponding slot in os_processes
+  // 6.
+  // Wait for scheduler to fetch another process
+  // Note that this process will not be fetched anymore as we cleaned up the corresponding slot in os_processes
 }
 
 /*!
@@ -602,12 +613,12 @@ bool os_kill(process_id_t pid)
 {
 #warning[Praktikum 2] Implement here
 
-	// If the pid is invalid, return false
+  // If the pid is invalid, return false
 
-	// Clean up the process slot of the terminating process
+  // Clean up the process slot of the terminating process
 
-	// Tidy up the scheduler
-	// (Process needs to be removed from ready queue of DPRR)
+  // Tidy up the scheduler
+  // (Process needs to be removed from ready queue of DPRR)
 
-	// If the process kills itself, we mustn't return
+  // If the process kills itself, we mustn't return
 }

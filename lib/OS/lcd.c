@@ -8,8 +8,8 @@
 //----------------------------------------------------------------------------
 int lcd_stdioPutChar(char c, FILE *stream)
 {
-	lcd_writeChar(c);
-	return 0;
+  lcd_writeChar(c);
+  return 0;
 }
 
 /*!
@@ -18,12 +18,12 @@ int lcd_stdioPutChar(char c, FILE *stream)
  */
 void lcd_printf_p(const char *fmt, ...)
 {
-	va_list args;
-	va_start(args, fmt);
-	stdout->flags |= __SPGM;
-	vfprintf_P(&lcd_stdout, fmt, args);
-	stdout->flags &= ~__SPGM;
-	va_end(args);
+  va_list args;
+  va_start(args, fmt);
+  stdout->flags |= __SPGM;
+  vfprintf_P(&lcd_stdout, fmt, args);
+  stdout->flags &= ~__SPGM;
+  va_end(args);
 }
 
 FILE lcd_stdout = FDEV_SETUP_STREAM(lcd_stdioPutChar, NULL, _FDEV_SETUP_WRITE);
@@ -45,12 +45,12 @@ uint8_t charCtr;
  */
 static void lcd_enablePulse(void)
 {
-	os_enterCriticalSection();
-	LCD_EN_HIGH();
-	_delay_us(1); // Enable pulse must be >450ns
-	LCD_EN_LOW();
-	_delay_us(100); // Commands need >37us to settle
-	os_leaveCriticalSection();
+  os_enterCriticalSection();
+  LCD_EN_HIGH();
+  _delay_us(1); // Enable pulse must be >450ns
+  LCD_EN_LOW();
+  _delay_us(100); // Commands need >37us to settle
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -60,26 +60,26 @@ static void lcd_enablePulse(void)
  */
 static void lcd_sendNibble(uint8_t nibble)
 {
-	os_enterCriticalSection();
-	if (nibble & 0x01)
-		LCD_D4_HIGH();
-	else
-		LCD_D4_LOW();
-	if (nibble & 0x02)
-		LCD_D5_HIGH();
-	else
-		LCD_D5_LOW();
-	if (nibble & 0x04)
-		LCD_D6_HIGH();
-	else
-		LCD_D6_LOW();
-	if (nibble & 0x08)
-		LCD_D7_HIGH();
-	else
-		LCD_D7_LOW();
+  os_enterCriticalSection();
+  if (nibble & 0x01)
+    LCD_D4_HIGH();
+  else
+    LCD_D4_LOW();
+  if (nibble & 0x02)
+    LCD_D5_HIGH();
+  else
+    LCD_D5_LOW();
+  if (nibble & 0x04)
+    LCD_D6_HIGH();
+  else
+    LCD_D6_LOW();
+  if (nibble & 0x08)
+    LCD_D7_HIGH();
+  else
+    LCD_D7_LOW();
 
-	lcd_enablePulse();
-	os_leaveCriticalSection();
+  lcd_enablePulse();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -87,37 +87,37 @@ static void lcd_sendNibble(uint8_t nibble)
  */
 void lcd_init(void)
 {
-	os_enterCriticalSection();
-	// Set pin directions to output
-	DDRH |= (1 << LCD_RS_PIN) | (1 << LCD_EN_PIN) | (1 << LCD_D6_PIN) | (1 << LCD_D7_PIN);
-	DDRE |= (1 << LCD_D5_PIN);
-	DDRG |= (1 << LCD_D4_PIN);
-	DDRF |= (1 << LCD_RW_PIN);
+  os_enterCriticalSection();
+  // Set pin directions to output
+  DDRH |= (1 << LCD_RS_PIN) | (1 << LCD_EN_PIN) | (1 << LCD_D6_PIN) | (1 << LCD_D7_PIN);
+  DDRE |= (1 << LCD_D5_PIN);
+  DDRG |= (1 << LCD_D4_PIN);
+  DDRF |= (1 << LCD_RW_PIN);
 
-	// RW is always LOW (write mode)
-	LCD_RW_LOW();
+  // RW is always LOW (write mode)
+  LCD_RW_LOW();
 
-	// Initialization sequence
-	_delay_ms(50); // Wait for more than 40ms after Vcc rises to 2.7V
+  // Initialization sequence
+  _delay_ms(50); // Wait for more than 40ms after Vcc rises to 2.7V
 
-	lcd_sendNibble(0x03); // Function set: 8-bit mode
-	_delay_ms(5);					// Wait for more than 4.1ms
+  lcd_sendNibble(0x03); // Function set: 8-bit mode
+  _delay_ms(5);         // Wait for more than 4.1ms
 
-	lcd_sendNibble(0x03); // Function set: 8-bit mode
-	_delay_us(200);				// Wait for more than 100µs
+  lcd_sendNibble(0x03); // Function set: 8-bit mode
+  _delay_us(200);       // Wait for more than 100µs
 
-	lcd_sendNibble(0x03); // Function set: 8-bit mode
-	_delay_us(200);
+  lcd_sendNibble(0x03); // Function set: 8-bit mode
+  _delay_us(200);
 
-	lcd_sendNibble(0x02); // Function set: 4-bit mode
+  lcd_sendNibble(0x02); // Function set: 4-bit mode
 
-	lcd_sendCommand(LCD_CMD_FUNCTION_SET | LCD_4BIT_MODE | LCD_2LINE | LCD_5x8DOTS);
-	lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON) & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
-	lcd_sendCommand(LCD_CMD_CLEAR_DISPLAY);
-	lcd_sendCommand(LCD_CMD_ENTRY_MODE_SET | 0x02); // Increment cursor, no display shift
+  lcd_sendCommand(LCD_CMD_FUNCTION_SET | LCD_4BIT_MODE | LCD_2LINE | LCD_5x8DOTS);
+  lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON) & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
+  lcd_sendCommand(LCD_CMD_CLEAR_DISPLAY);
+  lcd_sendCommand(LCD_CMD_ENTRY_MODE_SET | 0x02); // Increment cursor, no display shift
 
-	_delay_ms(5);
-	os_leaveCriticalSection();
+  _delay_ms(5);
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -125,11 +125,11 @@ void lcd_init(void)
  */
 void lcd_clear(void)
 {
-	os_enterCriticalSection();
-	charCtr = 0;
-	lcd_sendCommand(LCD_CMD_CLEAR_DISPLAY);
-	_delay_ms(2); // Clearing the display requires a delay
-	os_leaveCriticalSection();
+  os_enterCriticalSection();
+  charCtr = 0;
+  lcd_sendCommand(LCD_CMD_CLEAR_DISPLAY);
+  _delay_ms(2); // Clearing the display requires a delay
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -137,10 +137,10 @@ void lcd_clear(void)
  */
 void lcd_home(void)
 {
-	os_enterCriticalSection();
-	lcd_sendCommand(LCD_CMD_RETURN_HOME);
-	_delay_ms(2); // Returning home requires a delay
-	os_leaveCriticalSection();
+  os_enterCriticalSection();
+  lcd_sendCommand(LCD_CMD_RETURN_HOME);
+  _delay_ms(2); // Returning home requires a delay
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -148,7 +148,7 @@ void lcd_home(void)
  */
 void lcd_displayOn(void)
 {
-	lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON) & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
+  lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON) & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
 }
 
 /*!
@@ -156,7 +156,7 @@ void lcd_displayOn(void)
  */
 void lcd_displayOff(void)
 {
-	lcd_sendCommand(LCD_CMD_DISPLAY_CONTROL & ~LCD_DISPLAY_ON & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
+  lcd_sendCommand(LCD_CMD_DISPLAY_CONTROL & ~LCD_DISPLAY_ON & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
 }
 
 /*!
@@ -164,7 +164,7 @@ void lcd_displayOff(void)
  */
 void lcd_cursorOn(void)
 {
-	lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_ON) & ~LCD_BLINK_ON);
+  lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_ON) & ~LCD_BLINK_ON);
 }
 
 /*!
@@ -172,7 +172,7 @@ void lcd_cursorOn(void)
  */
 void lcd_cursorOff(void)
 {
-	lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON) & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
+  lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON) & ~LCD_CURSOR_ON & ~LCD_BLINK_ON);
 }
 
 /*!
@@ -180,7 +180,7 @@ void lcd_cursorOff(void)
  */
 void lcd_blinkOn(void)
 {
-	lcd_sendCommand(LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_ON | LCD_BLINK_ON);
+  lcd_sendCommand(LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_ON | LCD_BLINK_ON);
 }
 
 /*!
@@ -188,7 +188,7 @@ void lcd_blinkOn(void)
  */
 void lcd_blinkOff(void)
 {
-	lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_ON) & ~LCD_BLINK_ON);
+  lcd_sendCommand((LCD_CMD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_ON) & ~LCD_BLINK_ON);
 }
 
 /*!
@@ -200,13 +200,13 @@ void lcd_blinkOff(void)
 void lcd_goto(uint8_t row, uint8_t col)
 {
 
-	if (row > 1)
-		row = 1; // We only support two lines
+  if (row > 1)
+    row = 1; // We only support two lines
 
-	os_enterCriticalSection();
-	lcd_sendCommand(LCD_CMD_SET_DDRAM_ADDR | (col + 0x40 * row));
-	charCtr = row * 16 + col;
-	os_leaveCriticalSection();
+  os_enterCriticalSection();
+  lcd_sendCommand(LCD_CMD_SET_DDRAM_ADDR | (col + 0x40 * row));
+  charCtr = row * 16 + col;
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -216,15 +216,15 @@ void lcd_goto(uint8_t row, uint8_t col)
  */
 void lcd_writeString(char *string)
 {
-	char c;
-	os_enterCriticalSection();
+  char c;
+  os_enterCriticalSection();
 
-	while ((c = *(string++)) != '\0')
-	{
-		lcd_writeChar(c);
-	}
+  while ((c = *(string++)) != '\0')
+  {
+    lcd_writeChar(c);
+  }
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -241,15 +241,15 @@ void lcd_writeString(char *string)
  */
 void lcd_writeProgString(char const *string)
 {
-	char c;
-	os_enterCriticalSection();
+  char c;
+  os_enterCriticalSection();
 
-	while ((c = (char)pgm_read_byte(string++)) != '\0')
-	{
-		lcd_writeChar(c);
-	}
+  while ((c = (char)pgm_read_byte(string++)) != '\0')
+  {
+    lcd_writeChar(c);
+  }
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -259,14 +259,14 @@ void lcd_writeProgString(char const *string)
  */
 void lcd_sendCommand(uint8_t cmd)
 {
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	LCD_RS_LOW(); // Command mode
-	lcd_sendNibble(cmd >> 4);
-	lcd_sendNibble(cmd);
-	_delay_us(40); // Most commands take < 37µs
+  LCD_RS_LOW(); // Command mode
+  lcd_sendNibble(cmd >> 4);
+  lcd_sendNibble(cmd);
+  _delay_us(40); // Most commands take < 37µs
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -276,14 +276,14 @@ void lcd_sendCommand(uint8_t cmd)
  */
 void lcd_sendData(uint8_t data)
 {
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	LCD_RS_HIGH(); // Data mode
-	lcd_sendNibble(data >> 4);
-	lcd_sendNibble(data);
-	_delay_us(40); // Most characters take < 37µs
+  LCD_RS_HIGH(); // Data mode
+  lcd_sendNibble(data >> 4);
+  lcd_sendNibble(data);
+  _delay_us(40); // Most characters take < 37µs
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -291,61 +291,61 @@ void lcd_sendData(uint8_t data)
  */
 void lcd_writeChar(char character)
 {
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	if (character == '\n')
-	{
-		charCtr = (charCtr & LCD_COLS) + LCD_COLS; // <16 -> 16, <32 -> 32
-	}
+  if (character == '\n')
+  {
+    charCtr = (charCtr & LCD_COLS) + LCD_COLS; // <16 -> 16, <32 -> 32
+  }
 
-	// Perform line-break if necessary
-	if (charCtr == LCD_COLS)
-	{
-		lcd_line2();
-	}
-	else if (charCtr == 2 * LCD_COLS)
-	{
-		lcd_clear();
-		lcd_line1();
-	}
+  // Perform line-break if necessary
+  if (charCtr == LCD_COLS)
+  {
+    lcd_line2();
+  }
+  else if (charCtr == 2 * LCD_COLS)
+  {
+    lcd_clear();
+    lcd_line1();
+  }
 
-	// Check for non-ASCII characters the LCD knows
-	switch (character)
-	{
-	case (char)0xC3A4:
-		character = 0xE1; // Character code for 'ä'
-		break;
-	case (char)0xC3B6:
-		character = 0xEF; // Character code for 'ö'
-		break;
-	case (char)0xC3BC:
-		character = 0xF5; // Character code for 'ü'
-		break;
-	case (char)0xC39F:
-		character = 0xE2; // Character code for 'ß'
-		break;
-	case (char)0xC384:
-		character = 0xE1; // Character code for 'Ä'
-		break;
-	case (char)0xC396:
-		character = 0xEF; // Character code for 'Ö'
-		break;
-	case (char)0xC39C:
-		character = 0xF5; // Character code for 'Ü'
-		break;
-	case (char)0xC2B0:
-		character = 0xDF; // Character code for '°' (degree symbol)
-		break;
-	case (char)0xC2B5:
-		character = 0xE4; // Character code for 'µ' (backslash)
-		break;
-	}
+  // Check for non-ASCII characters the LCD knows
+  switch (character)
+  {
+  case (char)0xC3A4:
+    character = 0xE1; // Character code for 'ä'
+    break;
+  case (char)0xC3B6:
+    character = 0xEF; // Character code for 'ö'
+    break;
+  case (char)0xC3BC:
+    character = 0xF5; // Character code for 'ü'
+    break;
+  case (char)0xC39F:
+    character = 0xE2; // Character code for 'ß'
+    break;
+  case (char)0xC384:
+    character = 0xE1; // Character code for 'Ä'
+    break;
+  case (char)0xC396:
+    character = 0xEF; // Character code for 'Ö'
+    break;
+  case (char)0xC39C:
+    character = 0xF5; // Character code for 'Ü'
+    break;
+  case (char)0xC2B0:
+    character = 0xDF; // Character code for '°' (degree symbol)
+    break;
+  case (char)0xC2B5:
+    character = 0xE4; // Character code for 'µ' (backslash)
+    break;
+  }
 
-	// Draw character
-	lcd_sendData(character);
-	charCtr++;
+  // Draw character
+  lcd_sendData(character);
+  charCtr++;
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -355,17 +355,17 @@ void lcd_writeChar(char character)
  */
 void lcd_writeHexNibble(uint8_t number)
 {
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	// get low and high nibble
-	uint8_t const low = number & 0xF;
+  // get low and high nibble
+  uint8_t const low = number & 0xF;
 
-	if (low < 10)
-		lcd_writeChar(low + '0'); // write as ASCII number
-	else
-		lcd_writeChar(low - 10 + 'A'); // write as ASCII letter
+  if (low < 10)
+    lcd_writeChar(low + '0'); // write as ASCII number
+  else
+    lcd_writeChar(low - 10 + 'A'); // write as ASCII letter
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -375,12 +375,12 @@ void lcd_writeHexNibble(uint8_t number)
  */
 void lcd_writeHexByte(uint8_t number)
 {
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	lcd_writeHexNibble(number >> 4);
-	lcd_writeHexNibble(number & 0xF);
+  lcd_writeHexNibble(number >> 4);
+  lcd_writeHexNibble(number & 0xF);
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -390,12 +390,12 @@ void lcd_writeHexByte(uint8_t number)
  */
 void lcd_writeHexWord(uint16_t number)
 {
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	lcd_writeHexByte(number >> 8);
-	lcd_writeHexByte(number);
+  lcd_writeHexByte(number >> 8);
+  lcd_writeHexByte(number);
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -405,23 +405,23 @@ void lcd_writeHexWord(uint16_t number)
  */
 void lcd_writeHex(uint16_t number)
 {
-	uint16_t nib = 16;
-	uint8_t print = 0;
+  uint16_t nib = 16;
+  uint8_t print = 0;
 
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	// iterate over all nibbles and start printing when we find the first non-zero
-	while (nib)
-	{
-		nib -= 4;
-		print |= number >> nib;
-		if (print)
-		{
-			lcd_writeHexNibble(number >> nib);
-		}
-	}
+  // iterate over all nibbles and start printing when we find the first non-zero
+  while (nib)
+  {
+    nib -= 4;
+    print |= number >> nib;
+    if (print)
+    {
+      lcd_writeHexNibble(number >> nib);
+    }
+  }
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -431,26 +431,26 @@ void lcd_writeHex(uint16_t number)
  */
 void lcd_writeDec(uint16_t number)
 {
-	if (!number)
-	{
-		lcd_writeChar('0');
-		return;
-	}
+  if (!number)
+  {
+    lcd_writeChar('0');
+    return;
+  }
 
-	uint32_t pos = 10000;
-	uint8_t print = 0;
+  uint32_t pos = 10000;
+  uint8_t print = 0;
 
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	do
-	{
-		uint8_t const digit = number / pos;
-		number -= digit * pos;
-		if (print |= digit)
-			lcd_writeChar(digit + '0');
-	} while (pos /= 10);
+  do
+  {
+    uint8_t const digit = number / pos;
+    number -= digit * pos;
+    if (print |= digit)
+      lcd_writeChar(digit + '0');
+  } while (pos /= 10);
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -461,19 +461,19 @@ void lcd_writeDec(uint16_t number)
 void lcd_drawBar(uint8_t percent)
 {
 
-	os_enterCriticalSection();
+  os_enterCriticalSection();
 
-	lcd_clear();
-	// calculate number of bars
-	uint16_t const val = ((percent <= 100) ? percent : 100) * 16;
-	uint16_t i = 0;
-	// draw bars
-	for (i = 0; i < val; i += 100)
-	{
-		lcd_writeChar(LCD_CHAR_BAR);
-	}
+  lcd_clear();
+  // calculate number of bars
+  uint16_t const val = ((percent <= 100) ? percent : 100) * 16;
+  uint16_t i = 0;
+  // draw bars
+  for (i = 0; i < val; i += 100)
+  {
+    lcd_writeChar(LCD_CHAR_BAR);
+  }
 
-	os_leaveCriticalSection();
+  os_leaveCriticalSection();
 }
 
 /*!
@@ -481,7 +481,7 @@ void lcd_drawBar(uint8_t percent)
  */
 void lcd_line1()
 {
-	lcd_goto(0, 0);
+  lcd_goto(0, 0);
 }
 
 /*!
@@ -489,5 +489,5 @@ void lcd_line1()
  */
 void lcd_line2()
 {
-	lcd_goto(1, 0);
+  lcd_goto(1, 0);
 }
