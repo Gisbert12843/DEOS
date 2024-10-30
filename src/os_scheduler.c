@@ -375,7 +375,7 @@ ISR(TIMER2_COMPA_vect)
   default:
     currentProc = INVALID_PROCESS;
     break;
-  }
+  } 
 
   // In task 2: Check if the checksum changed since the process was interrupted
 
@@ -493,23 +493,23 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
 
   // 2. Find free slot in os_processes array
   int free_slot = -1;
-  DEBUG("os_exec()-> os_exec on progID %d\n", programID);
+  terminal_log_printf_p(PSTR("os_exec() -> "), PSTR("Looking for free slot\n"));
 
   for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
   {
     if (os_processes[i].state == OS_PS_UNUSED)
     {
-      DEBUG("os_exec()->Found free slot in os_processes at %d\n", i);
+      terminal_log_printf_p(PSTR("os_exec() -> "), PSTR("Slot %d is free\n"), i);
       free_slot = i;
       break;
     }
-    DEBUG("os_exec()->Slot %d is used\n", i);
+    terminal_log_printf_p(PSTR("os_exec() -> "), PSTR("Slot %d is not free\n"), i);
   }
 
   if (free_slot == -1)
   {
     os_error("No free slot available");
-    DEBUG("os_exec()->No free slot available\n");
+    terminal_log_printf_p(PSTR("os_exec() -> "), PSTR("No free slot available\n"));
     os_leaveCriticalSection();
     return INVALID_PROCESS;
   }
@@ -521,7 +521,7 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
   if (function == NULL)
   {
     os_error("Invalid program ID");
-    DEBUG("os_exec()->Invalid program ID\n");
+    terminal_log_printf_p(PSTR("os_exec() -> "), PSTR("Invalid program ID\n"));
     os_leaveCriticalSection();
     return INVALID_PROCESS;
   }
@@ -563,7 +563,7 @@ void os_initScheduler(void)
   // As the processes are just being initialized, all slots should be unused so far.
   for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
   {
-    terminal_log_printf_p(PSTR("        "), PSTR("os_processes[%d].state = %d\n"), i, os_processes[i].state);
+    terminal_log_printf_p(PSTR("os_initScheduler() -> "), PSTR("Setting process %d to unused\n"), i);
     os_processes[i].state = OS_PS_UNUSED;
   }
 
@@ -572,10 +572,17 @@ void os_initScheduler(void)
   {
     if (os_checkAutostartProgram(i))
     {
-      terminal_log_printf_p(PSTR("        "), PSTR("os_exec on program %d\n"), i);
+      terminal_log_printf_p(PSTR("os_initScheduler() -> "), PSTR("calling os_exec on program %d\n"), i);
       os_exec(i, DEFAULT_PRIORITY);
     }
+    else
+    {
+      terminal_log_printf_p(PSTR("os_initScheduler() -> "), PSTR("program %d is not autostarted\n"), i);
+    }
   }
+  terminal_log_printf_p(PSTR("os_initScheduler() -> "), PSTR("All autostart programs executed\n"));
+
+  delayMs(3000);
 
   // Uncomment:
   assert(os_programs[0] != NULL, "There is no idle proc");
@@ -592,6 +599,8 @@ void os_startScheduler(void)
 
   // Set the state of the now chosen process to running
   os_processes[currentProc].state = OS_PS_RUNNING;
+
+  terminal_log_printf_p(PSTR("os_startScheduler() -> "), PSTR("Starting IDLE\n"));
 
   // Set SP on the stack of the idle process, this will cause the idle process to start running,
   // as the SP now points onto the idle functions address

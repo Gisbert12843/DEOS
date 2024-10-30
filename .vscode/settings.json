@@ -80,6 +80,7 @@
     "interrupt.h": "c",
     "util.h": "c",
     "terminal.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "uart.h": "c"
   }
 }

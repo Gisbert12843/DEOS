@@ -10,39 +10,45 @@
 #include "util.h"
 #include <stdio.h>
 
+#define BAUDRATE 115200
+
 //----------------------------------------------------------------------------
 // Configuration of stdio.h
 //----------------------------------------------------------------------------
 int stdio_put_char(char c, FILE *stream)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    terminal_writeChar(c);
-    if (c == '\n')
-    {
-        terminal_writeProgString(PSTR("        "));
-    }
+  terminal_writeChar(c);
+  if (c == '\n')
+  {
+    terminal_writeProgString(PSTR("        "));
+  }
 
-    os_leaveCriticalSection();
-    return 0;
+  os_leaveCriticalSection();
+#endif
+  return 0;
 }
 
 void terminal_log_printf_p(const char *prefix, const char *fmt, ...)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    terminal_writeProgString(prefix);
+  terminal_writeProgString(prefix);
 
-    va_list args;
-    va_start(args, fmt);
-    stdout->flags |= __SPGM;
-    vfprintf_P(stdout, fmt, args);
-    stdout->flags &= ~__SPGM;
-    va_end(args);
+  va_list args;
+  va_start(args, fmt);
+  stdout->flags |= __SPGM;
+  vfprintf_P(stdout, fmt, args);
+  stdout->flags &= ~__SPGM;
+  va_end(args);
 
-    terminal_newLine();
+  terminal_newLine();
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 FILE mystdout = FDEV_SETUP_STREAM(stdio_put_char, NULL, _FDEV_SETUP_WRITE);
@@ -55,10 +61,12 @@ FILE mystdout = FDEV_SETUP_STREAM(stdio_put_char, NULL, _FDEV_SETUP_WRITE);
  */
 void terminal_init()
 {
-    os_enterCriticalSection();
-    uart2_init(UART_BAUD_SELECT(38400, F_CPU));
-    stdout = &mystdout;
-    os_leaveCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
+  uart2_init(UART_BAUD_SELECT(BAUDRATE, F_CPU));
+  stdout = &mystdout;
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -68,18 +76,20 @@ void terminal_init()
  */
 void terminal_writeHexNibble(uint8_t number)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    if (number < 10)
-    {
-        uart2_putc('0' + number);
-    }
-    else
-    {
-        uart2_putc('A' + number - 10);
-    }
+  if (number < 10)
+  {
+    uart2_putc('0' + number);
+  }
+  else
+  {
+    uart2_putc('A' + number - 10);
+  }
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -89,12 +99,14 @@ void terminal_writeHexNibble(uint8_t number)
  */
 void terminal_writeHexByte(uint8_t number)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    terminal_writeHexNibble(number >> 4);
-    terminal_writeHexNibble(number & 0xF);
+  terminal_writeHexNibble(number >> 4);
+  terminal_writeHexNibble(number & 0xF);
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -104,12 +116,14 @@ void terminal_writeHexByte(uint8_t number)
  */
 void terminal_writeHexWord(uint16_t number)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    terminal_writeHexByte(number >> 8);
-    terminal_writeHexByte(number);
+  terminal_writeHexByte(number >> 8);
+  terminal_writeHexByte(number);
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -119,22 +133,24 @@ void terminal_writeHexWord(uint16_t number)
  */
 void terminal_writeHex(uint16_t number)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    uint8_t nib = 12;
-    uint8_t print = 0;
+  uint8_t nib = 12;
+  uint8_t print = 0;
 
-    while (nib)
+  while (nib)
+  {
+    nib -= 4;
+    print |= number >> nib;
+    if (print)
     {
-        nib -= 4;
-        print |= number >> nib;
-        if (print)
-        {
-            terminal_writeHexNibble(number >> nib);
-        }
+      terminal_writeHexNibble(number >> nib);
     }
+  }
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -144,26 +160,28 @@ void terminal_writeHex(uint16_t number)
  */
 void terminal_writeDec(uint16_t number)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    if (!number)
-    {
-        terminal_writeChar('0');
-        return;
-    }
+  if (!number)
+  {
+    terminal_writeChar('0');
+    return;
+  }
 
-    uint32_t pos = 10000;
-    uint8_t print = 0;
+  uint32_t pos = 10000;
+  uint8_t print = 0;
 
-    do
-    {
-        uint8_t const digit = number / pos;
-        number -= digit * pos;
-        if (print |= digit)
-            terminal_writeChar(digit + '0');
-    } while (pos /= 10);
+  do
+  {
+    uint8_t const digit = number / pos;
+    number -= digit * pos;
+    if (print |= digit)
+      terminal_writeChar(digit + '0');
+  } while (pos /= 10);
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -173,21 +191,23 @@ void terminal_writeDec(uint16_t number)
  */
 void terminal_writeChar(char character)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    // TX buffer needs to be flushed manually if interrupts are disabled
-    if (!gbi(SREG, 7) && uart2_gettxcount() >= UART2_TX_BUFFER_SIZE - 2) // at most 2 chars can be written in case of \n
-    {
-        terminal_flushBlocking();
-    }
+  // TX buffer needs to be flushed manually if interrupts are disabled
+  if (!gbi(SREG, 7) && uart2_gettxcount() >= UART2_TX_BUFFER_SIZE - 2) // at most 2 chars can be written in case of \n
+  {
+    terminal_flushBlocking();
+  }
 
-    if (character == '\n')
-    {
-        uart2_putc('\r');
-    }
-    uart2_putc(character);
+  if (character == '\n')
+  {
+    uart2_putc('\r');
+  }
+  uart2_putc(character);
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -197,11 +217,13 @@ void terminal_writeChar(char character)
  */
 void terminal_writeString(char *str)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    uart2_puts(str);
+  uart2_puts(str);
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -211,16 +233,18 @@ void terminal_writeString(char *str)
  */
 void terminal_writeProgString(const char *pstr)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    char *ptr = (char *)pstr;
-    char c;
-    while ((c = pgm_read_byte(ptr++)) != '\0')
-    {
-        terminal_writeChar(c);
-    }
+  char *ptr = (char *)pstr;
+  char c;
+  while ((c = pgm_read_byte(ptr++)) != '\0')
+  {
+    terminal_writeChar(c);
+  }
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -230,25 +254,27 @@ void terminal_writeProgString(const char *pstr)
  */
 void terminal_writeIndentedProgString(const char *pstr)
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    char *ptr = (char *)pstr;
-    char c;
-    while ((c = pgm_read_byte(ptr++)) != '\0')
+  char *ptr = (char *)pstr;
+  char c;
+  while ((c = pgm_read_byte(ptr++)) != '\0')
+  {
+    terminal_writeChar(c);
+    if (c == '\n')
     {
-        terminal_writeChar(c);
-        if (c == '\n')
-        {
-            char next = pgm_read_byte(ptr + 1);
-            if (next != '\n' && next != '\0')
-            {
-                terminal_writeProgString(PSTR("         "));
-            }
-            continue;
-        }
+      char next = pgm_read_byte(ptr + 1);
+      if (next != '\n' && next != '\0')
+      {
+        terminal_writeProgString(PSTR("         "));
+      }
+      continue;
     }
+  }
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -256,11 +282,13 @@ void terminal_writeIndentedProgString(const char *pstr)
  */
 void terminal_newLine()
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    terminal_writeChar('\n');
+  terminal_writeChar('\n');
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }
 
 /*!
@@ -268,9 +296,11 @@ void terminal_newLine()
  */
 void terminal_flushBlocking()
 {
-    os_enterCriticalSection();
+#if DEBUG_MODE
+  os_enterCriticalSection();
 
-    uart2_flush_blocking();
+  uart2_flush_blocking();
 
-    os_leaveCriticalSection();
+  os_leaveCriticalSection();
+#endif
 }

@@ -70,7 +70,15 @@ process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t c
   process_id_t currentProc = os_getCurrentProc();
 
   // Look for the next proc that is ready, there has to be at least one, this has been checked before. Don't choose 0 as it is the idle process
-  for (uint8_t i = currentProc; i < MAX_NUMBER_OF_PROCESSES; i++)
+  for (uint8_t i = currentProc + 1; i < MAX_NUMBER_OF_PROCESSES; i++)
+  {
+    if (processes[i].state == OS_PS_READY)
+    {
+      DEBUG("Scheduling Process: %d\n", i);
+      return i; // Return resulting process id
+    }
+  }
+  for (uint8_t i = 1; i < currentProc + 1; i++)
   {
     if (processes[i].state == OS_PS_READY)
     {
