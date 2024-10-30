@@ -1,7 +1,7 @@
 #ifndef _LCD_H_
 #define _LCD_H_
 
-#include "util.h"
+#include "../lib/util.h"
 #include <avr/io.h>
 #include <stdbool.h>
 #include <stdint.h>

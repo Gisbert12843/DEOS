@@ -1,9 +1,9 @@
 #include "progs.h"
-#if defined(USER_PROGRAM_ENABLED) && USER_PROGRAM == 3
+#if defined(USER_PROGRAM_ENABLED) && USER_PROGRAM == 1
 
-#include "defines.h"
-#include "lcd.h"
-#include "util.h"
+#include "lib/defines.h"
+#include "lib/lcd.h"
+#include "lib/util.h"
 #include "os_core.h"
 #include "os_process.h"
 

@@ -78,6 +78,8 @@
     "defines.h": "c",
     "progs.h": "c",
     "interrupt.h": "c",
-    "util.h": "c"
+    "util.h": "c",
+    "terminal.h": "c",
+    "stdio.h": "c"
   }
 }

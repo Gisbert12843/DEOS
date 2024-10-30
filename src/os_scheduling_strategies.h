@@ -11,14 +11,14 @@
 #ifndef _OS_SCHEDULING_STRATEGIES_H
 #define _OS_SCHEDULING_STRATEGIES_H
 
-#include "defines.h"
-#include "ready_queue.h"
+#include "lib/defines.h"
+#include "lib/ready_queue.h"
 #include "os_scheduler.h"
 
 //! Structure used to store specific scheduling informations
 typedef struct SchedulingInformation
 {
-  ready_queue_t queues_ready[PRIORITY_COUNT];
+	ready_queue_t queues_ready[PRIORITY_COUNT];
 } scheduling_information_t;
 
 //! Used to reset the SchedulingInfo for one process

@@ -1,11 +1,14 @@
 //-------------------------------------------------
-//          TestSuite: Scheduling Strategien
+//          TestSuite: Scheduling Strategies
 //-------------------------------------------------
-#include "../progs.h"
-#if defined(TESTTASK_ENABLED) && TESTTASK == 1
+// Checks if scheduling strategies correctly
+// schedule processes
+//-------------------------------------------------
+#include "progs.h"
+#if defined(TESTTASK_ENABLED) && TESTTASK == TT_SCHEDULING
 
-#include "lcd.h"
-#include "util.h"
+#include "lib/lcd.h"
+#include "lib/util.h"
 #include "os_scheduler.h"
 #include "os_scheduling_strategies.h"
 #include <avr/interrupt.h>

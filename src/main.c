@@ -1,6 +1,6 @@
-#include "defines.h"
-#include "lcd.h"
-#include "util.h"
+#include "lib/defines.h"
+#include "lib/lcd.h"
+#include "lib/util.h"
 #include "os_core.h"
 #include "os_scheduler.h"
 
@@ -17,19 +17,8 @@ int main(void)
 
   // os_init shows a boot message
   // Wait and clear the LCD
-  delayMs(1000);
+  delayMs(600);
   lcd_clear();
-
-  // while (true)
-  // {
-  //   lcd_clear();
-  //   printf("lcd cleared");
-
-  //   delayMs(1000);
-  //   lcd_writeString("OS started");
-  //   printf("OS started");
-  //   delayMs(1000);
-  // }
 
   // Start the operating system
   os_startScheduler();

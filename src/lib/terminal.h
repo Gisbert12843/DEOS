@@ -12,10 +12,16 @@
 
 #define INFO(str, ...) terminal_log_printf_p(PSTR("[INFO]  "), PSTR(str), ##__VA_ARGS__)
 #define WARN(str, ...) terminal_log_printf_p(PSTR("[WARN]  "), PSTR(str), ##__VA_ARGS__)
+
 #ifdef DEBUG
 #undef DEBUG
 #endif
+
+#if DEBUG_MODE
 #define DEBUG(str, ...) terminal_log_printf_p(PSTR("[DEBUG] "), PSTR(str), ##__VA_ARGS__) // You could use __LINE__ or __FILE__ to include line number or file name in the log message
+#else
+#define DEBUG(str, ...) //
+#endif
 
 //! Initialize the terminal
 void terminal_init();

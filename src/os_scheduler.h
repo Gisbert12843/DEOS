@@ -11,7 +11,7 @@
 #ifndef _OS_SCHEDULER_H
 #define _OS_SCHEDULER_H
 
-#include "defines.h"
+#include "lib/defines.h"
 #include "os_process.h"
 
 #include <stdbool.h>
@@ -23,8 +23,8 @@
 //! The enum specifying which scheduling strategies exist
 typedef enum SchedulingStrategy
 {
-  OS_SS_ROUND_ROBIN,
-  OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN
+	OS_SS_ROUND_ROBIN,
+	OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN
 } scheduling_strategy_t;
 
 // Change this define to reflect the number of available strategies:

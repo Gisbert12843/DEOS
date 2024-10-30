@@ -344,8 +344,6 @@ ISR(TIMER2_COMPA_vect)
   // 2. Save runtime-context of recently current process using the well-known macro
   saveContext();
 
-  uint8_t currentProc = os_getCurrentProc();
-
   // 3. Save stack pointer of current process
   os_processes[currentProc].sp.as_int = SP;
 
@@ -364,29 +362,28 @@ ISR(TIMER2_COMPA_vect)
   // In task 2: Check if the stack pointer has an invalid value
 
   // 6. Find next process using the set scheduling strategy
-  process_id_t nextProc;
 
   switch (os_getSchedulingStrategy())
   {
   case OS_SS_ROUND_ROBIN:
-    nextProc = os_scheduler_RoundRobin(os_processes, currentProc);
+    currentProc = os_scheduler_RoundRobin(os_processes, currentProc);
     break;
   case OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN:
-    nextProc = os_scheduler_DynamicPriorityRoundRobin(os_processes, currentProc);
+    currentProc = os_scheduler_DynamicPriorityRoundRobin(os_processes, currentProc);
     break;
 
   default:
-    nextProc = INVALID_PROCESS;
+    currentProc = INVALID_PROCESS;
     break;
   }
 
   // In task 2: Check if the checksum changed since the process was interrupted
 
   // 7. Set the state of the now chosen process to running
-  os_processes[nextProc].state = OS_PS_RUNNING;
+  os_processes[currentProc].state = OS_PS_RUNNING;
 
   // 8. Set SP to where it was when the resuming process was interrupted
-  SP = os_processes[nextProc].sp.as_int;
+  SP = os_processes[currentProc].sp.as_int;
 
   // 9. Restore runtime context using the well-known macro.
   // This will cause the process to continue where it was interrupted.
@@ -413,6 +410,70 @@ PROGRAM(0, AUTOSTART)
   }
 }
 
+#define DEBUG_NO_PREFIX(str, ...) terminal_log_printf_p(PSTR("        "), PSTR(str), ##__VA_ARGS__)
+
+/*!
+ *  Debug print the context of the given process (registers on stack)
+ *
+ * \param pid  The process ID.
+ */
+void DEBUG_CONTEXT(process_id_t pid)
+{
+  /*
+  for (uint8_t i = 0; i < 36; i++)
+  {
+      DEBUG_NO_PREFIX("- %02d: 0x%02X", i, os_processes[pid].sp.as_ptr[i + 1]);
+  }
+  */
+  terminal_flushBlocking();
+  DEBUG("Process Context %d:\n- ProgramPointer: 0x%02X%02X%02X\n- SREG: 0x%02X",
+        pid,
+        os_processes[pid].sp.as_ptr[34], // ProgramPointer (high)
+        os_processes[pid].sp.as_ptr[35], // ProgramPointer (mid)
+        os_processes[pid].sp.as_ptr[36], // ProgramPointer (low)
+        os_processes[pid].sp.as_ptr[32]  // SREG
+  );
+  terminal_flushBlocking();
+  DEBUG_NO_PREFIX("- R00: 0x%02X\n- R01: 0x%02X\n- R02: 0x%02X\n- R03: 0x%02X\n- R04: 0x%02X\n- R05: 0x%02X\n- R06: 0x%02X\n- R07: 0x%02X\n- R08: 0x%02X\n- R09: 0x%02X\n- R10: 0x%02X\n- R11: 0x%02X\n- R12: 0x%02X\n- R13: 0x%02X\n- R14: 0x%02X\n- R15: 0x%02X",
+                  os_processes[pid].sp.as_ptr[1],  // R00
+                  os_processes[pid].sp.as_ptr[2],  // R01
+                  os_processes[pid].sp.as_ptr[3],  // R02
+                  os_processes[pid].sp.as_ptr[4],  // R03
+                  os_processes[pid].sp.as_ptr[5],  // R04
+                  os_processes[pid].sp.as_ptr[6],  // R05
+                  os_processes[pid].sp.as_ptr[7],  // R06
+                  os_processes[pid].sp.as_ptr[8],  // R07
+                  os_processes[pid].sp.as_ptr[9],  // R08
+                  os_processes[pid].sp.as_ptr[10], // R09
+                  os_processes[pid].sp.as_ptr[11], // R10
+                  os_processes[pid].sp.as_ptr[12], // R11
+                  os_processes[pid].sp.as_ptr[13], // R12
+                  os_processes[pid].sp.as_ptr[14], // R13
+                  os_processes[pid].sp.as_ptr[15], // R14
+                  os_processes[pid].sp.as_ptr[16]  // R15
+  );
+  terminal_flushBlocking();
+  DEBUG_NO_PREFIX("- R16: 0x%02X\n- R17: 0x%02X\n- R18: 0x%02X\n- R19: 0x%02X\n- R20: 0x%02X\n- R21: 0x%02X\n- R22: 0x%02X\n- R23: 0x%02X\n- R24: 0x%02X\n- R25: 0x%02X\n- R26: 0x%02X\n- R27: 0x%02X\n- R28: 0x%02X\n- R29: 0x%02X\n- R30: 0x%02X\n- R31: 0x%02X",
+                  os_processes[pid].sp.as_ptr[17], // R16
+                  os_processes[pid].sp.as_ptr[18], // R17
+                  os_processes[pid].sp.as_ptr[19], // R18
+                  os_processes[pid].sp.as_ptr[20], // R19
+                  os_processes[pid].sp.as_ptr[21], // R20
+                  os_processes[pid].sp.as_ptr[22], // R21
+                  os_processes[pid].sp.as_ptr[23], // R22
+                  os_processes[pid].sp.as_ptr[24], // R23
+                  os_processes[pid].sp.as_ptr[25], // R24
+                  os_processes[pid].sp.as_ptr[26], // R25
+                  os_processes[pid].sp.as_ptr[27], // R26
+                  os_processes[pid].sp.as_ptr[28], // R27
+                  os_processes[pid].sp.as_ptr[29], // R28
+                  os_processes[pid].sp.as_ptr[30], // R29
+                  os_processes[pid].sp.as_ptr[31], // R30
+                  os_processes[pid].sp.as_ptr[33]  // R31
+  );
+  terminal_flushBlocking(); // To ensure that everything is printed
+}
+
 /*!
  *  This function is used to execute a program that has been introduced with
  *  os_registerProgram.
@@ -432,18 +493,23 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
 
   // 2. Find free slot in os_processes array
   int free_slot = -1;
-  for (int i = 0; i < sizeof(os_processes) / sizeof(process_t); i++)
+  DEBUG("os_exec()-> os_exec on progID %d\n", programID);
+
+  for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
   {
     if (os_processes[i].state == OS_PS_UNUSED)
     {
+      DEBUG("os_exec()->Found free slot in os_processes at %d\n", i);
       free_slot = i;
       break;
     }
+    DEBUG("os_exec()->Slot %d is used\n", i);
   }
 
   if (free_slot == -1)
   {
     os_error("No free slot available");
+    DEBUG("os_exec()->No free slot available\n");
     os_leaveCriticalSection();
     return INVALID_PROCESS;
   }
@@ -455,6 +521,7 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
   if (function == NULL)
   {
     os_error("Invalid program ID");
+    DEBUG("os_exec()->Invalid program ID\n");
     os_leaveCriticalSection();
     return INVALID_PROCESS;
   }
@@ -465,23 +532,19 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
   os_processes[free_slot].priority = priority;
 
   // Initialize the stack pointer
-  stack_pointer_t sp;
-  sp.as_ptr = (uint8_t *)PROCESS_STACK_BOTTOM(free_slot);
-  sp.as_int = PROCESS_STACK_BOTTOM(free_slot);
+  os_processes[free_slot].sp.as_int = PROCESS_STACK_BOTTOM(free_slot);
 
   // 5.1 push the address of the function to the stack
-  uint8_t stackptr_offset = 0;
-  *(sp.as_ptr -= stackptr_offset) = (uint8_t)(addressOfProgram(function) & 0xFF);
-  *(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 8) & 0xFF);
-  *(sp.as_ptr -= ++stackptr_offset) = (uint8_t)((addressOfProgram(function) >> 16) & 0xFF);
+  *os_processes[free_slot].sp.as_ptr-- = (uint8_t)(addressOfProgram(function));
+  *os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 8));
+  *os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 16));
 
   // 5.2 leave space on the process stack for register entries
   for (uint8_t i = 0; i < 33; i++)
   {
-    *(sp.as_ptr -= ++stackptr_offset) = 0;
+    *os_processes[free_slot].sp.as_ptr-- = 0;
   }
-
-  os_processes[free_slot].sp = sp;
+  terminal_writeProgString(PSTR("\n"));
 
   // 6. Leave Critical Section
   os_leaveCriticalSection();
@@ -500,6 +563,7 @@ void os_initScheduler(void)
   // As the processes are just being initialized, all slots should be unused so far.
   for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
   {
+    terminal_log_printf_p(PSTR("        "), PSTR("os_processes[%d].state = %d\n"), i, os_processes[i].state);
     os_processes[i].state = OS_PS_UNUSED;
   }
 
@@ -508,6 +572,7 @@ void os_initScheduler(void)
   {
     if (os_checkAutostartProgram(i))
     {
+      terminal_log_printf_p(PSTR("        "), PSTR("os_exec on program %d\n"), i);
       os_exec(i, DEFAULT_PRIORITY);
     }
   }
@@ -522,18 +587,15 @@ void os_initScheduler(void)
  */
 void os_startScheduler(void)
 {
-
   // Set currentProc to idle process
   currentProc = 0;
 
   // Set the state of the now chosen process to running
   os_processes[currentProc].state = OS_PS_RUNNING;
-  os_processes[currentProc].sp.as_int = PROCESS_STACK_BOTTOM(0);
-  os_processes[currentProc].priority = OS_PRIO_LOW;
 
   // Set SP on the stack of the idle process, this will cause the idle process to start running,
   // as the SP now points onto the idle functions address
-  SP = (int)os_lookupProgramFunction(currentProc);
+  SP = os_processes[currentProc].sp.as_int;
 
   // Load initial context and start the idle process
   restoreContext();

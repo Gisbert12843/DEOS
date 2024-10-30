@@ -11,6 +11,8 @@
 #include "os_scheduling_strategies.h"
 #include "defines.h"
 #include "ready_queue.h"
+#include "terminal.h"
+#include "avr/pgmspace.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -72,6 +74,7 @@ process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t c
   {
     if (processes[i].state == OS_PS_READY)
     {
+      DEBUG("Scheduling Process: %d\n", i);
       return i; // Return resulting process id
     }
   }

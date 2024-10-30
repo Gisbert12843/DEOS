@@ -8,7 +8,7 @@
  *  \version  1.0
  */
 
-#include "os_process.h"
+#include "../os_process.h"
 #include "defines.h"
 
 #include <stdbool.h>
@@ -22,9 +22,9 @@
 //! structure used to store processes and additional logic to implement a circular buffer
 typedef struct ready_queue_t
 {
-  process_id_t processes[READY_QUEUE_SIZE];
-  uint8_t head;
-  uint8_t tail;
+	process_id_t processes[READY_QUEUE_SIZE];
+	uint8_t head;
+	uint8_t tail;
 } ready_queue_t;
 
 //! initializes a ready queue to be empty

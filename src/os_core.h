@@ -11,9 +11,9 @@
 #ifndef _OS_CORE_H
 #define _OS_CORE_H
 
-#include "defines.h"
-#include "lcd.h"
-#include "terminal.h"
+#include "lib/defines.h"
+#include "lib/lcd.h"
+#include "lib/terminal.h"
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
