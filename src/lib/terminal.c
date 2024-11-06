@@ -10,7 +10,7 @@
 #include "util.h"
 #include <stdio.h>
 
-#define BAUDRATE 115200
+// #define BAUDRATE 115200
 
 //----------------------------------------------------------------------------
 // Configuration of stdio.h

@@ -65,7 +65,7 @@ bool isAnyProcReady(process_t const processes[])
  */
 process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t current)
 {
-  os_setSchedulingStrategy(OS_SS_ROUND_ROBIN);
+  // os_setSchedulingStrategy(OS_SS_ROUND_ROBIN);
 
   process_id_t currentProc = os_getCurrentProc();
 

@@ -371,9 +371,8 @@ ISR(TIMER2_COMPA_vect)
   case OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN:
     currentProc = os_scheduler_DynamicPriorityRoundRobin(os_processes, currentProc);
     break;
-
   default:
-    currentProc = INVALID_PROCESS;
+    currentProc = 0;
     break;
   } 
 
