@@ -15,6 +15,8 @@
 #include <avr/interrupt.h>
 #include <stdbool.h>
 
+
+
 //----------------------------------------------------------------------------
 // Globals
 //----------------------------------------------------------------------------
@@ -625,6 +627,26 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
 
   // Be aware of cases where the whole stack is less than 10 bytes
   // (although this actually won't happen due to the call to saveContext() beforehand, which always puts 33 bytes on to the stack already)
+  uint8_t stack_bottom = PROCESS_STACK_BOTTOM(pid);
+  uint8_t stack_top = PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC;
+  uint8_t stack_size = stack_bottom - stack_top;
+
+  if(stack_size >= 10)
+  {
+    for(uint8_t i = 0; i < stack_size; i+= stack_size/10)
+    {
+      os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
+    }
+  }
+  else
+  {
+    for(uint8_t i = 0; i < 10; i++)
+    {
+      os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
+    }
+  }
+  
+  return os_processes[pid].checksum;
 }
 
 /*!
@@ -635,7 +657,12 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
  */
 bool os_isStackInBounds(process_id_t pid)
 {
-#warning[Praktikum 2] Implement here
+  #warning[Praktikum 2] Implement here
+  if(SP > PROCESS_STACK_BOTTOM(pid) || SP < PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC)
+  {
+    return false;
+  }
+  return true;
 }
 
 /*!
