@@ -36,6 +36,8 @@ void rq_push(ready_queue_t *queue, process_id_t process);
 //! pops one ready of the queue and returns it
 process_id_t rq_pop(ready_queue_t *queue);
 
+void rq_terminal_print(ready_queue_t *queue);
+
 //! check if queue is empty
 bool rq_isEmpty(ready_queue_t *queue);
 

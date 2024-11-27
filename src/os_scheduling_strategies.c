@@ -106,9 +106,12 @@ void os_resetProcessSchedulingInformation(scheduling_strategy_t strategy, proces
     return;
   }
 
-  rq_remove(&(schedulingInfo.queues_ready[os_getProcessSlot(id)->priority]), id);
+  for (uint8_t i = OS_PRIO_HIGH; i <= OS_PRIO_LOW; i++)
+  {
+    rq_remove(&(schedulingInfo.queues_ready[i]), id);
+  }
 
-  rq_push(&(schedulingInfo.queues_ready[DEFAULT_PRIORITY]), id);
+  rq_push(&(schedulingInfo.queues_ready[os_getProcessSlot(id)->priority]), id);
 }
 
 /*!
@@ -157,25 +160,69 @@ void os_resetSchedulingInformation(scheduling_strategy_t strategy)
  */
 process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[], process_id_t current)
 {
-#warning[Praktikum 2] Implement here
+  DEBUG("\nScheduling from current Process: %d with ProgramID: %d\n", current, os_getProcessSlot(current)->progID);
+
   // 1. Move processes one higher in priority
-  for (int i = OS_PRIO_HIGH; i < OS_PRIO_LOW; i++)
+  for (int i = 0; i < PRIORITY_COUNT - 1; i++)
   {
+
     if (!rq_isEmpty(&schedulingInfo.queues_ready[i + 1]))
     {
+      if ((os_getProcessSlot(schedulingInfo.queues_ready[i + 1].processes[schedulingInfo.queues_ready[i + 1].head])->progID == 0))
+      {
+        process_id_t pro_id = rq_pop(&schedulingInfo.queues_ready[i + 1]);
+        if (rq_isEmpty(&schedulingInfo.queues_ready[i + 1]))
+        {
+          DEBUG("Idle process skipped in priority %d\n", i + 1);
+          rq_push(&schedulingInfo.queues_ready[i + 1], pro_id);
+          continue;
+        }
+        else
+        {
+          rq_push(&schedulingInfo.queues_ready[i + 1], pro_id);
+          DEBUG("Moved Process: %d from priority %d to %d\n", pro_id, i + 1, i);
+        }
+      }
       process_id_t pid = rq_pop(&schedulingInfo.queues_ready[i + 1]);
+
       rq_push(&schedulingInfo.queues_ready[i], pid);
+
+      DEBUG("Moved Process: %d from priority %d to %d\n", pid, i + 1, i);
+    }
+    else
+    {
+      DEBUG("No movable process found in priority %d\n", i + 1);
     }
   }
+
   // 2. Push current process to the ready queue
-  rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(current)->priority], current);
+  if (os_getProcessSlot(current)->state == OS_PS_READY)
+  {
+    rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(current)->priority], current);
+    DEBUG("Pushed current Process: %d to priority %d\n", current, os_getProcessSlot(current)->priority);
+  }
+  else
+  {
+    DEBUG("Current Process: %d is not ready\n", current);
+  }
 
   // 3. Get next process from ready queue
-  for (int i = OS_PRIO_HIGH; i <= OS_PRIO_LOW; i++)
+  for (int i = 0; i < PRIORITY_COUNT - 1; i++)
   {
     if (!rq_isEmpty(&schedulingInfo.queues_ready[i]))
     {
-      return rq_pop(&schedulingInfo.queues_ready[i]);
+
+      process_id_t next_pid = rq_pop(&schedulingInfo.queues_ready[i]);
+      DEBUG("Next Process to run: %d from priority %d\n", next_pid, i);
+      return next_pid;
+    }
+    else
+    {
+      DEBUG("No ready process found in priority %d\n", i);
     }
   }
+
+  // If no process is ready, return idle process (0)
+  DEBUG("No ready process found, returning idle process\n");
+  return 0;
 }

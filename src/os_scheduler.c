@@ -362,6 +362,10 @@ ISR(TIMER2_COMPA_vect)
   os_processes[currentProc].checksum = os_getStackChecksum(currentProc);
 
   // In task 2: Check if the stack pointer has an invalid value
+  if (!os_isStackInBounds(currentProc))
+  {
+    os_error("Stack pointer out of bounds in process %d", currentProc);
+  }
 
   // 6. Find next process using the set scheduling strategy
 
@@ -634,31 +638,77 @@ void os_startScheduler(void)
  *  \param pid The ID of the process for which the stack's checksum has to be calculated.
  *  \return The spare checksum of the pid'th stack.
  */
+// stack_checksum_t os_getStackChecksum(process_id_t pid)
+// {
+// #warning[Praktikum 2] Implement here
+
+//   // Be aware of cases where the whole stack is less than 10 bytes
+//   // (although this actually won't happen due to the call to saveContext() beforehand, which always puts 33 bytes on to the stack already)
+//   uint8_t stack_bottom = PROCESS_STACK_BOTTOM(pid);
+//   uint8_t stack_top = PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC;
+//   uint8_t stack_size = stack_bottom - stack_top;
+
+//   if (stack_size >= 10)
+//   {
+//     for (uint8_t i = 0; i < stack_size; i += stack_size / 10)
+//     {
+//       os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
+//     }
+//   }
+//   else
+//   {
+//     for (uint8_t i = 0; i < 10; i++)
+//     {
+//       os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
+//     }
+//   }
+//   DEBUG("Checksum of process %d: %d", pid, os_processes[pid].checksum);
+//   return os_processes[pid].checksum;
+// }
+
 stack_checksum_t os_getStackChecksum(process_id_t pid)
 {
 #warning[Praktikum 2] Implement here
 
   // Be aware of cases where the whole stack is less than 10 bytes
   // (although this actually won't happen due to the call to saveContext() beforehand, which always puts 33 bytes on to the stack already)
-  uint8_t stack_bottom = PROCESS_STACK_BOTTOM(pid);
-  uint8_t stack_top = PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC;
+  /*
+  Zur Berechnung der Prüfsumme sollen 16 verteilte Bytes des Prozessstacks mit dem
+bitweisen XOR verknüpft werden. Die Verteilung der 16 Bytes kann beliebig erfolgen,
+jedoch muss sichergestellt sein, dass bei wiederholten Aufrufen der Funktion für einen
+unveränderten Prozessstack stets dieselbe Prüfziffer berechnet wird. Das Byte an der
+höchstwertigen Adresse des Prozessstacks soll dabei in die Berechnung miteinbezogen
+werden.
+Der Typ stack_checksum_t ist bereits mit geeignetem Wertebereich vorgegeben. Es
+genügt, die Daten in die Überprüfung einzubeziehen, die zwischen dem Anfang des
+Prozessstacks und dem Stackpointer des entsprechenden Prozesses liegen. Daten, die
+jenseits dieses Stackpointers liegen, werden vom Prozess nicht genutzt und sind für die
+Konsistenz irrelevant.
+Diese Hashfunktion hat den Vorteil, dass sie mit wenig Aufwand zu berechnen ist und
+Aufrufe dieser Funktion daher in relativ kurzer Zeit abgearbeitet werden können.
+  */
+
+  stack_checksum_t checksum = 0;
+  uint8_t *stack_bottom = (uint8_t *)PROCESS_STACK_BOTTOM(pid);
+  uint8_t *stack_top = (uint8_t *)(os_processes[pid].sp.as_int);
   uint8_t stack_size = stack_bottom - stack_top;
 
-  if (stack_size >= 10)
+  if (stack_size >= 16)
   {
-    for (uint8_t i = 0; i < stack_size; i += stack_size / 10)
+    for (uint8_t i = 0; i < 16; i++)
     {
-      os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
+      checksum ^= stack_top[i * (stack_size / 16)];
     }
   }
   else
   {
-    for (uint8_t i = 0; i < 10; i++)
+    for (uint8_t i = 0; i < stack_size; i++)
     {
-      os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
+      checksum ^= stack_top[i];
     }
   }
-  return os_processes[pid].checksum;
+
+  return checksum;
 }
 
 /*!
@@ -712,7 +762,8 @@ void os_dispatcher()
 
   // 3.
   // This obviously must be outside of a critical section so the scheduler can do its job while the process is running
-  function();
+  if (function != NULL)
+    function();
 
   // 4. Happens implicitly
 
@@ -720,10 +771,13 @@ void os_dispatcher()
   // Try to kill the terminating process
   os_kill(currentProc);
 
-  os_yield();
   // 6.
   // Wait for scheduler to fetch another process
   // Note that this process will not be fetched anymore as we cleaned up the corresponding slot in os_processes
+  while (currentProc == os_getCurrentProc())
+  {
+    os_yield();
+  }
 }
 
 /*!
