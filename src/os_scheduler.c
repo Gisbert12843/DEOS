@@ -11,11 +11,10 @@
 #include "os_core.h"
 #include "os_process.h"
 #include "os_scheduling_strategies.h"
+#include "ready_queue.h"
 
 #include <avr/interrupt.h>
 #include <stdbool.h>
-
-
 
 //----------------------------------------------------------------------------
 // Globals
@@ -360,6 +359,7 @@ ISR(TIMER2_COMPA_vect)
   // Note for task 2: Only set to ready if it is currently running because of os_kill
 
   // In task 2: Save the processes stack checksum
+  os_processes[currentProc].checksum = os_getStackChecksum(currentProc);
 
   // In task 2: Check if the stack pointer has an invalid value
 
@@ -376,9 +376,13 @@ ISR(TIMER2_COMPA_vect)
   default:
     currentProc = 0;
     break;
-  } 
+  }
 
   // In task 2: Check if the checksum changed since the process was interrupted
+  if (os_processes[currentProc].checksum != os_getStackChecksum(currentProc))
+  {
+    os_error("Checksum mismatch in process %d", currentProc);
+  }
 
   // 7. Set the state of the now chosen process to running
   os_processes[currentProc].state = OS_PS_RUNNING;
@@ -516,7 +520,8 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
   }
 
   // 3. Obtain the respective function pointer
-  program_t *function = os_lookupProgramFunction(programID);
+  // program_t *function = os_lookupProgramFunction(programID);
+  program_t *function = os_dispatcher;
 
   // If looked up function pointer is invalid, abort os_exec and return INVALID_PROCESS
   if (function == NULL)
@@ -536,6 +541,8 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
   os_processes[free_slot].sp.as_int = PROCESS_STACK_BOTTOM(free_slot);
 
   // 5.1 push the address of the function to the stack
+  // Note for task 2: use address of os_dispatcher instead
+
   *os_processes[free_slot].sp.as_ptr-- = (uint8_t)(addressOfProgram(function));
   *os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 8));
   *os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 16));
@@ -545,7 +552,11 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
   {
     *os_processes[free_slot].sp.as_ptr-- = 0;
   }
-  terminal_writeProgString(PSTR("\n"));
+
+  // For task 2: Save the stack checksum
+  os_processes[free_slot].checksum = os_getStackChecksum(programID);
+
+  os_resetProcessSchedulingInformation(os_getSchedulingStrategy(), programID);
 
   // 6. Leave Critical Section
   os_leaveCriticalSection();
@@ -567,6 +578,8 @@ void os_initScheduler(void)
     terminal_log_printf_p(PSTR("os_initScheduler() -> "), PSTR("Setting process %d to unused\n"), i);
     os_processes[i].state = OS_PS_UNUSED;
   }
+
+  os_resetSchedulingInformation(currSchedStrat);
 
   // Start all registered programs, which a flagged as autostart (i.e. call os_exec on them).
   for (int i = 0; i < MAX_NUMBER_OF_PROGRAMS; i++)
@@ -631,21 +644,20 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
   uint8_t stack_top = PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC;
   uint8_t stack_size = stack_bottom - stack_top;
 
-  if(stack_size >= 10)
+  if (stack_size >= 10)
   {
-    for(uint8_t i = 0; i < stack_size; i+= stack_size/10)
+    for (uint8_t i = 0; i < stack_size; i += stack_size / 10)
     {
       os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
     }
   }
   else
   {
-    for(uint8_t i = 0; i < 10; i++)
+    for (uint8_t i = 0; i < 10; i++)
     {
       os_processes[pid].checksum += os_processes[pid].sp.as_ptr[i];
     }
   }
-  
   return os_processes[pid].checksum;
 }
 
@@ -657,8 +669,8 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
  */
 bool os_isStackInBounds(process_id_t pid)
 {
-  #warning[Praktikum 2] Implement here
-  if(SP > PROCESS_STACK_BOTTOM(pid) || SP < PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC)
+#warning[Praktikum 2] Implement here
+  if (os_processes[pid].sp.as_int > PROCESS_STACK_BOTTOM(pid) || os_processes[pid].sp.as_int < PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC)
   {
     return false;
   }
@@ -671,6 +683,15 @@ bool os_isStackInBounds(process_id_t pid)
 void os_yield()
 {
 #warning[Praktikum 2] Implement here
+
+  // check if interrupts are disabled
+  if (criticalSectionCount != 0)
+  {
+    return;
+  }
+  cli();
+
+  TIMER2_COMPA_vect();
 }
 
 /*!
@@ -686,15 +707,20 @@ void os_dispatcher()
   // 1. Happens in os_exec
 
   // 2.
+  process_id_t currentProc = os_getCurrentProc();
+  program_t *function = os_lookupProgramFunction(os_processes[currentProc].progID);
 
   // 3.
   // This obviously must be outside of a critical section so the scheduler can do its job while the process is running
+  function();
 
   // 4. Happens implicitly
 
   // 5.
   // Try to kill the terminating process
+  os_kill(currentProc);
 
+  os_yield();
   // 6.
   // Wait for scheduler to fetch another process
   // Note that this process will not be fetched anymore as we cleaned up the corresponding slot in os_processes
@@ -709,13 +735,27 @@ void os_dispatcher()
 bool os_kill(process_id_t pid)
 {
 #warning[Praktikum 2] Implement here
+  os_enterCriticalSection();
 
   // If the pid is invalid, return false
+  if (pid >= MAX_NUMBER_OF_PROCESSES || pid == 0 || os_processes[pid].state == OS_PS_UNUSED)
+  {
+    return false;
+  }
 
   // Clean up the process slot of the terminating process
+  os_getProcessSlot(pid)->state = OS_PS_UNUSED;
 
   // Tidy up the scheduler
   // (Process needs to be removed from ready queue of DPRR)
+  os_resetProcessSchedulingInformation(os_getSchedulingStrategy(), pid);
+
+  os_leaveCriticalSection();
 
   // If the process kills itself, we mustn't return
+  while (os_getCurrentProc() == pid)
+  {
+    os_yield();
+  }
+  return true;
 }

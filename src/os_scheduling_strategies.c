@@ -101,6 +101,14 @@ process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t c
 void os_resetProcessSchedulingInformation(scheduling_strategy_t strategy, process_id_t id)
 {
 #warning[Praktikum 2] Implement here
+  if (strategy == OS_SS_ROUND_ROBIN)
+  {
+    return;
+  }
+
+  rq_remove(&(schedulingInfo.queues_ready[os_getProcessSlot(id)->priority]), id);
+
+  rq_push(&(schedulingInfo.queues_ready[DEFAULT_PRIORITY]), id);
 }
 
 /*!
@@ -108,11 +116,35 @@ void os_resetProcessSchedulingInformation(scheduling_strategy_t strategy, proces
  *  This is only relevant for DynamicPriorityRoundRobin
  *  and is done when the strategy is changed through os_setSchedulingStrategy
  *
+ *  Diese Funktion soll die zu der Strategie strategy gespeicherten Daten zurücksetzen. Es
+ *  sollen alle vom Array queues_ready verwalteten Warteschlangen geleert werden und die
+ *  Prozesse erneut in die der Priorität entsprechenden Warteschlange eingereiht werden.
+ *  Die Funktion wird automatisch aufgerufen, sobald sich die Strategie ändert. Fügen Sie
+ *  an geeigneter Stelle in os_initScheduler einen Aufruf dieser Funktion ein, damit die
+ *  Strategie beim Start des Betriebssystems initialisiert wird.
+ *
  * \param strategy  The strategy to reset information for
  */
 void os_resetSchedulingInformation(scheduling_strategy_t strategy)
 {
 #warning[Praktikum 2] Implement here
+  if (strategy == OS_SS_ROUND_ROBIN)
+  {
+    return;
+  }
+
+  for (uint8_t i = 0; i <= OS_PRIO_LOW; i++)
+  {
+    rq_clear(&schedulingInfo.queues_ready[i]);
+  }
+
+  for (process_id_t pid = 0; pid < MAX_NUMBER_OF_PROCESSES; pid++)
+  {
+    if (os_getProcessSlot(pid)->state == OS_PS_READY)
+    {
+      rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(pid)->priority], pid);
+    }
+  }
 }
 
 /*!
@@ -126,10 +158,24 @@ void os_resetSchedulingInformation(scheduling_strategy_t strategy)
 process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[], process_id_t current)
 {
 #warning[Praktikum 2] Implement here
-
   // 1. Move processes one higher in priority
-
+  for (int i = OS_PRIO_HIGH; i < OS_PRIO_LOW; i++)
+  {
+    if (!rq_isEmpty(&schedulingInfo.queues_ready[i + 1]))
+    {
+      process_id_t pid = rq_pop(&schedulingInfo.queues_ready[i + 1]);
+      rq_push(&schedulingInfo.queues_ready[i], pid);
+    }
+  }
   // 2. Push current process to the ready queue
+  rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(current)->priority], current);
 
   // 3. Get next process from ready queue
+  for (int i = OS_PRIO_HIGH; i <= OS_PRIO_LOW; i++)
+  {
+    if (!rq_isEmpty(&schedulingInfo.queues_ready[i]))
+    {
+      return rq_pop(&schedulingInfo.queues_ready[i]);
+    }
+  }
 }
