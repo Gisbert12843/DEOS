@@ -2,6 +2,12 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
+communication\rfAdapter.c
+
+communication\serialAdapter.c
+
+communication\xbee.c
+
 lib\buttons.c
 
 lib\lcd.c

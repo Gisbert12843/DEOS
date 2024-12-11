@@ -44,6 +44,9 @@ SUBDIRS :=  \
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
+../communication/rfAdapter.c \
+../communication/serialAdapter.c \
+../communication/xbee.c \
 ../lib/buttons.c \
 ../lib/lcd.c \
 ../lib/ready_queue.c \
@@ -80,6 +83,9 @@ ASM_SRCS +=
 
 
 OBJS +=  \
+communication/rfAdapter.o \
+communication/serialAdapter.o \
+communication/xbee.o \
 lib/buttons.o \
 lib/lcd.o \
 lib/ready_queue.o \
@@ -109,6 +115,9 @@ progs/user_programs/user_prog2.o \
 progs/user_programs/user_prog3.o
 
 OBJS_AS_ARGS +=  \
+communication/rfAdapter.o \
+communication/serialAdapter.o \
+communication/xbee.o \
 lib/buttons.o \
 lib/lcd.o \
 lib/ready_queue.o \
@@ -138,6 +147,9 @@ progs/user_programs/user_prog2.o \
 progs/user_programs/user_prog3.o
 
 C_DEPS +=  \
+communication/rfAdapter.d \
+communication/serialAdapter.d \
+communication/xbee.d \
 lib/buttons.d \
 lib/lcd.d \
 lib/ready_queue.d \
@@ -167,6 +179,9 @@ progs/user_programs/user_prog2.d \
 progs/user_programs/user_prog3.d
 
 C_DEPS_AS_ARGS +=  \
+communication/rfAdapter.d \
+communication/serialAdapter.d \
+communication/xbee.d \
 lib/buttons.d \
 lib/lcd.d \
 lib/ready_queue.d \
@@ -209,6 +224,27 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+communication/rfAdapter.o: ../communication/rfAdapter.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+communication/serialAdapter.o: ../communication/serialAdapter.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+communication/xbee.o: ../communication/xbee.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 lib/buttons.o: ../lib/buttons.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0

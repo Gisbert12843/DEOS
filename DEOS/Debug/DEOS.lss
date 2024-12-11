@@ -466,12 +466,6 @@ Disassembly of section .text:
      59c:	31 cd       	rjmp	.-1438   	; 0x0 <__vectors>
 
 0000059e <lcd_enablePulse>:
-			lcd_writeHexNibble(number >> nib);
-		}
-	}
-
-	os_leaveCriticalSection();
-}
      59e:	3a d6       	rcall	.+3188   	; 0x1214 <os_enterCriticalSection>
      5a0:	e2 e0       	ldi	r30, 0x02	; 2
      5a2:	f1 e0       	ldi	r31, 0x01	; 1
@@ -859,12 +853,6 @@ Disassembly of section .text:
      874:	08 95       	ret
 
 00000876 <lcd_writeDec>:
- *  Writes a 16 bit integer as a decimal number without leading 0s
- *
- *  \param number The number to be written.
- */
-void lcd_writeDec(uint16_t number)
-{
      876:	cf 92       	push	r12
      878:	df 92       	push	r13
      87a:	ef 92       	push	r14
@@ -873,34 +861,13 @@ void lcd_writeDec(uint16_t number)
      880:	cf 93       	push	r28
      882:	df 93       	push	r29
      884:	ec 01       	movw	r28, r24
-	if (!number)
      886:	89 2b       	or	r24, r25
      888:	19 f4       	brne	.+6      	; 0x890 <lcd_writeDec+0x1a>
-	{
-		lcd_writeChar('0');
      88a:	80 e3       	ldi	r24, 0x30	; 48
      88c:	9e df       	rcall	.-196    	; 0x7ca <lcd_writeChar>
-	}
-
-	uint32_t pos = 10000;
-	uint8_t print = 0;
-
-	os_enterCriticalSection();
      88e:	30 c0       	rjmp	.+96     	; 0x8f0 <lcd_writeDec+0x7a>
      890:	c1 d4       	rcall	.+2434   	; 0x1214 <os_enterCriticalSection>
-		lcd_writeChar('0');
-		return;
-	}
-
-	uint32_t pos = 10000;
-	uint8_t print = 0;
      892:	10 e0       	ldi	r17, 0x00	; 0
-	{
-		lcd_writeChar('0');
-		return;
-	}
-
-	uint32_t pos = 10000;
      894:	0f 2e       	mov	r0, r31
      896:	f0 e1       	ldi	r31, 0x10	; 16
      898:	cf 2e       	mov	r12, r31
@@ -909,19 +876,12 @@ void lcd_writeDec(uint16_t number)
      89e:	e1 2c       	mov	r14, r1
      8a0:	f1 2c       	mov	r15, r1
      8a2:	f0 2d       	mov	r31, r0
-
-	os_enterCriticalSection();
-
-	do
-	{
-		uint8_t const digit = number / pos;
      8a4:	be 01       	movw	r22, r28
      8a6:	80 e0       	ldi	r24, 0x00	; 0
      8a8:	90 e0       	ldi	r25, 0x00	; 0
      8aa:	a7 01       	movw	r20, r14
      8ac:	96 01       	movw	r18, r12
      8ae:	0e 94 5f 10 	call	0x20be	; 0x20be <__udivmodsi4>
-		number -= digit * pos;
      8b2:	42 2f       	mov	r20, r18
      8b4:	50 e0       	ldi	r21, 0x00	; 0
      8b6:	4c 9d       	mul	r20, r12
@@ -933,14 +893,11 @@ void lcd_writeDec(uint16_t number)
      8c2:	11 24       	eor	r1, r1
      8c4:	c8 1b       	sub	r28, r24
      8c6:	d9 0b       	sbc	r29, r25
-		if (print |= digit)
      8c8:	12 2b       	or	r17, r18
      8ca:	19 f0       	breq	.+6      	; 0x8d2 <lcd_writeDec+0x5c>
-			lcd_writeChar(digit + '0');
      8cc:	80 e3       	ldi	r24, 0x30	; 48
      8ce:	82 0f       	add	r24, r18
      8d0:	7c df       	rcall	.-264    	; 0x7ca <lcd_writeChar>
-	} while (pos /= 10);
      8d2:	c7 01       	movw	r24, r14
      8d4:	b6 01       	movw	r22, r12
      8d6:	2a e0       	ldi	r18, 0x0A	; 10
@@ -953,11 +910,8 @@ void lcd_writeDec(uint16_t number)
      8e6:	23 2b       	or	r18, r19
      8e8:	24 2b       	or	r18, r20
      8ea:	25 2b       	or	r18, r21
-
-	os_leaveCriticalSection();
      8ec:	d9 f6       	brne	.-74     	; 0x8a4 <lcd_writeDec+0x2e>
      8ee:	b1 d4       	rcall	.+2402   	; 0x1252 <os_leaveCriticalSection>
-}
      8f0:	df 91       	pop	r29
      8f2:	cf 91       	pop	r28
      8f4:	1f 91       	pop	r17
@@ -968,37 +922,21 @@ void lcd_writeDec(uint16_t number)
      8fe:	08 95       	ret
 
 00000900 <rq_isEmpty>:
- *  \param queue The queue it will check
- *  \return True if queue is empty, false if it's not empty
- */
-bool rq_isEmpty(ready_queue_t *queue)
-{
-	return queue->head == queue->tail;
      900:	fc 01       	movw	r30, r24
      902:	21 85       	ldd	r18, Z+9	; 0x09
      904:	92 85       	ldd	r25, Z+10	; 0x0a
      906:	81 e0       	ldi	r24, 0x01	; 1
      908:	29 13       	cpse	r18, r25
      90a:	80 e0       	ldi	r24, 0x00	; 0
-}
      90c:	08 95       	ret
 
 0000090e <rq_pop>:
- *  \param queue The queue it will push to
- *  \param process The process that will be pushed
- *  \return Popped process id
- */
-process_id_t rq_pop(ready_queue_t *queue)
-{
      90e:	cf 93       	push	r28
      910:	df 93       	push	r29
      912:	ec 01       	movw	r28, r24
-	if (rq_isEmpty(queue))
      914:	f5 df       	rcall	.-22     	; 0x900 <rq_isEmpty>
      916:	88 23       	and	r24, r24
      918:	39 f0       	breq	.+14     	; 0x928 <rq_pop+0x1a>
-	{
-		os_error("Can't pop from empty ready queue");
      91a:	86 e5       	ldi	r24, 0x56	; 86
      91c:	91 e0       	ldi	r25, 0x01	; 1
      91e:	9f 93       	push	r25
@@ -1006,8 +944,6 @@ process_id_t rq_pop(ready_queue_t *queue)
      922:	ec d3       	rcall	.+2008   	; 0x10fc <os_errorPstr>
      924:	0f 90       	pop	r0
      926:	0f 90       	pop	r0
-	}
-	process_id_t process = queue->processes[queue->head];
      928:	99 85       	ldd	r25, Y+9	; 0x09
      92a:	29 2f       	mov	r18, r25
      92c:	30 e0       	ldi	r19, 0x00	; 0
@@ -1015,7 +951,6 @@ process_id_t rq_pop(ready_queue_t *queue)
      930:	e2 0f       	add	r30, r18
      932:	f3 1f       	adc	r31, r19
      934:	80 81       	ld	r24, Z
-	queue->head = next(queue->head);
      936:	2f 5f       	subi	r18, 0xFF	; 255
      938:	3f 4f       	sbci	r19, 0xFF	; 255
      93a:	29 30       	cpi	r18, 0x09	; 9
@@ -1025,19 +960,11 @@ process_id_t rq_pop(ready_queue_t *queue)
      942:	01 c0       	rjmp	.+2      	; 0x946 <rq_pop+0x38>
      944:	90 e0       	ldi	r25, 0x00	; 0
      946:	99 87       	std	Y+9, r25	; 0x09
-	return process;
-}
      948:	df 91       	pop	r29
      94a:	cf 91       	pop	r28
      94c:	08 95       	ret
 
 0000094e <rq_isFull>:
- *  \param queue The queue it will check
- *  \return True if queue is full, false if it's not completely filled
- */
-bool rq_isFull(ready_queue_t *queue)
-{
-	return next(queue->tail) == queue->head;
      94e:	fc 01       	movw	r30, r24
      950:	22 85       	ldd	r18, Z+10	; 0x0a
      952:	30 e0       	ldi	r19, 0x00	; 0
@@ -1056,27 +983,17 @@ bool rq_isFull(ready_queue_t *queue)
      96c:	35 07       	cpc	r19, r21
      96e:	09 f0       	breq	.+2      	; 0x972 <rq_isFull+0x24>
      970:	80 e0       	ldi	r24, 0x00	; 0
-}
      972:	08 95       	ret
 
 00000974 <rq_push>:
- *
- *  \param queue The queue it will push to
- *  \param process The process that will be pushed
- */
-void rq_push(ready_queue_t *queue, process_id_t process)
-{
      974:	1f 93       	push	r17
      976:	cf 93       	push	r28
      978:	df 93       	push	r29
      97a:	ec 01       	movw	r28, r24
      97c:	16 2f       	mov	r17, r22
-	if (rq_isFull(queue))
      97e:	e7 df       	rcall	.-50     	; 0x94e <rq_isFull>
      980:	88 23       	and	r24, r24
      982:	39 f0       	breq	.+14     	; 0x992 <rq_push+0x1e>
-	{
-		os_error("Can't push on full ready queue");
      984:	87 e7       	ldi	r24, 0x77	; 119
      986:	91 e0       	ldi	r25, 0x01	; 1
      988:	9f 93       	push	r25
@@ -1084,8 +1001,6 @@ void rq_push(ready_queue_t *queue, process_id_t process)
      98c:	b7 d3       	rcall	.+1902   	; 0x10fc <os_errorPstr>
      98e:	0f 90       	pop	r0
      990:	0f 90       	pop	r0
-	}
-	queue->processes[queue->tail] = process;
      992:	2a 85       	ldd	r18, Y+10	; 0x0a
      994:	82 2f       	mov	r24, r18
      996:	90 e0       	ldi	r25, 0x00	; 0
@@ -1093,7 +1008,6 @@ void rq_push(ready_queue_t *queue, process_id_t process)
      99a:	e8 0f       	add	r30, r24
      99c:	f9 1f       	adc	r31, r25
      99e:	10 83       	st	Z, r17
-	queue->tail = next(queue->tail);
      9a0:	01 96       	adiw	r24, 0x01	; 1
      9a2:	09 97       	sbiw	r24, 0x09	; 9
      9a4:	14 f4       	brge	.+4      	; 0x9aa <rq_push+0x36>
@@ -1101,39 +1015,22 @@ void rq_push(ready_queue_t *queue, process_id_t process)
      9a8:	01 c0       	rjmp	.+2      	; 0x9ac <rq_push+0x38>
      9aa:	20 e0       	ldi	r18, 0x00	; 0
      9ac:	2a 87       	std	Y+10, r18	; 0x0a
-}
      9ae:	df 91       	pop	r29
      9b0:	cf 91       	pop	r28
      9b2:	1f 91       	pop	r17
      9b4:	08 95       	ret
 
 000009b6 <rq_clear>:
- *
- *  \param queue The queue that should be emptied
- */
-void rq_clear(ready_queue_t *queue)
-{
-	queue->head = 0;
      9b6:	fc 01       	movw	r30, r24
      9b8:	11 86       	std	Z+9, r1	; 0x09
-	queue->tail = 0;
      9ba:	12 86       	std	Z+10, r1	; 0x0a
      9bc:	08 95       	ret
 
 000009be <rq_remove>:
- *  \param queue The queue that should be removed from
- *  \param process The process that should be removed
- *  \return True if the process was removed, false if it wasn't found
- */
-bool rq_remove(ready_queue_t *queue, process_id_t process)
-{
      9be:	fc 01       	movw	r30, r24
-	for (int i = queue->head; i != queue->tail; i = next(i))
      9c0:	21 85       	ldd	r18, Z+9	; 0x09
      9c2:	30 e0       	ldi	r19, 0x00	; 0
      9c4:	32 c0       	rjmp	.+100    	; 0xa2a <rq_remove+0x6c>
-	{
-		if (queue->processes[i] == process)
      9c6:	df 01       	movw	r26, r30
      9c8:	a2 0f       	add	r26, r18
      9ca:	b3 1f       	adc	r27, r19
@@ -1141,10 +1038,6 @@ bool rq_remove(ready_queue_t *queue, process_id_t process)
      9ce:	56 13       	cpse	r21, r22
      9d0:	24 c0       	rjmp	.+72     	; 0xa1a <rq_remove+0x5c>
      9d2:	18 c0       	rjmp	.+48     	; 0xa04 <rq_remove+0x46>
-		{
-			for (int j = i; j != queue->tail; j = next(j))
-			{
-				queue->processes[j] = queue->processes[next(j)];
      9d4:	b9 01       	movw	r22, r18
      9d6:	6f 5f       	subi	r22, 0xFF	; 255
      9d8:	7f 4f       	sbci	r23, 0xFF	; 255
@@ -1162,12 +1055,6 @@ bool rq_remove(ready_queue_t *queue, process_id_t process)
      9f0:	a2 0f       	add	r26, r18
      9f2:	b3 1f       	adc	r27, r19
      9f4:	5c 93       	st	X, r21
-{
-	for (int i = queue->head; i != queue->tail; i = next(i))
-	{
-		if (queue->processes[i] == process)
-		{
-			for (int j = i; j != queue->tail; j = next(j))
      9f6:	69 30       	cpi	r22, 0x09	; 9
      9f8:	71 05       	cpc	r23, r1
      9fa:	1c f0       	brlt	.+6      	; 0xa02 <rq_remove+0x44>
@@ -1178,25 +1065,14 @@ bool rq_remove(ready_queue_t *queue, process_id_t process)
      a04:	28 17       	cp	r18, r24
      a06:	39 07       	cpc	r19, r25
      a08:	29 f7       	brne	.-54     	; 0x9d4 <rq_remove+0x16>
-			{
-				queue->processes[j] = queue->processes[next(j)];
-			}
-			queue->tail = prev(queue->tail);
      a0a:	44 23       	and	r20, r20
      a0c:	11 f0       	breq	.+4      	; 0xa12 <rq_remove+0x54>
      a0e:	41 50       	subi	r20, 0x01	; 1
      a10:	01 c0       	rjmp	.+2      	; 0xa14 <rq_remove+0x56>
      a12:	48 e0       	ldi	r20, 0x08	; 8
      a14:	42 87       	std	Z+10, r20	; 0x0a
-			return true;
      a16:	81 e0       	ldi	r24, 0x01	; 1
      a18:	08 95       	ret
- *  \param process The process that should be removed
- *  \return True if the process was removed, false if it wasn't found
- */
-bool rq_remove(ready_queue_t *queue, process_id_t process)
-{
-	for (int i = queue->head; i != queue->tail; i = next(i))
      a1a:	c9 01       	movw	r24, r18
      a1c:	01 96       	adiw	r24, 0x01	; 1
      a1e:	20 e0       	ldi	r18, 0x00	; 0
@@ -1211,23 +1087,10 @@ bool rq_remove(ready_queue_t *queue, process_id_t process)
      a30:	28 17       	cp	r18, r24
      a32:	39 07       	cpc	r19, r25
      a34:	41 f6       	brne	.-112    	; 0x9c6 <rq_remove+0x8>
-			}
-			queue->tail = prev(queue->tail);
-			return true;
-		}
-	}
-	return false;
      a36:	80 e0       	ldi	r24, 0x00	; 0
-}
      a38:	08 95       	ret
 
 00000a3a <__vector_17>:
- */
-void stopWatch_activateInterrupt(void)
-{
-    cbi(TCCR1B, CS10); // /8 prescaler	0
-    sbi(TCCR1B, CS11); // /8 prescaler	1
-    cbi(TCCR1B, CS12); // /8 prescaler	0
      a3a:	1f 92       	push	r1
      a3c:	0f 92       	push	r0
      a3e:	0f b6       	in	r0, 0x3f	; 63
@@ -1273,45 +1136,22 @@ void stopWatch_activateInterrupt(void)
      a9a:	08 95       	ret
 
 00000a9c <stopWatch_init>:
- *  Initializes the stop watch
- */
-void stopWatch_init(void)
-{
-    // Set Timer/Counter Control Registers to 0
-    TCCR1A = 0x00; // Normal mode
      a9c:	10 92 80 00 	sts	0x0080, r1	; 0x800080 <__TEXT_REGION_LENGTH__+0x7c0080>
-
-    // Set the Timer/Counter Register to 0
-    TCNT1 = 0;
      aa0:	10 92 85 00 	sts	0x0085, r1	; 0x800085 <__TEXT_REGION_LENGTH__+0x7c0085>
      aa4:	10 92 84 00 	sts	0x0084, r1	; 0x800084 <__TEXT_REGION_LENGTH__+0x7c0084>
-
-    // Set the compare match value to 1 (1 microsecond)
-    OCR1A = 1;
      aa8:	81 e0       	ldi	r24, 0x01	; 1
      aaa:	90 e0       	ldi	r25, 0x00	; 0
      aac:	90 93 89 00 	sts	0x0089, r25	; 0x800089 <__TEXT_REGION_LENGTH__+0x7c0089>
      ab0:	80 93 88 00 	sts	0x0088, r24	; 0x800088 <__TEXT_REGION_LENGTH__+0x7c0088>
-
-    // Enable the Output Compare Match A interrupt
-    TIMSK1 |= (1 << TOIE1);
      ab4:	ef e6       	ldi	r30, 0x6F	; 111
      ab6:	f0 e0       	ldi	r31, 0x00	; 0
      ab8:	80 81       	ld	r24, Z
      aba:	81 60       	ori	r24, 0x01	; 1
      abc:	80 83       	st	Z, r24
-
-    stopWatch_deactivateInterrupt();
      abe:	e2 cf       	rjmp	.-60     	; 0xa84 <stopWatch_deactivateInterrupt>
      ac0:	08 95       	ret
 
 00000ac2 <usb2_init>:
- *
- *  \param str  The string to be written (a pointer to the first character).
- */
-void terminal_writeString(char *str)
-{
-    usb2_writeString(str);
      ac2:	a8 d3       	rcall	.+1872   	; 0x1214 <os_enterCriticalSection>
      ac4:	83 e0       	ldi	r24, 0x03	; 3
      ac6:	90 e0       	ldi	r25, 0x00	; 0
@@ -1392,81 +1232,42 @@ void terminal_writeString(char *str)
      b58:	08 95       	ret
 
 00000b5a <terminal_writeProgString>:
- *
- *  \param pstr  The string to be written (a pointer to the first character).
- */
-void terminal_writeProgString(const char *pstr)
-{
-	usb2_writeProgString(pstr);
      b5a:	d0 cf       	rjmp	.-96     	; 0xafc <usb2_writeProgString>
      b5c:	08 95       	ret
 
 00000b5e <stdio_put_char>:
-
-//----------------------------------------------------------------------------
-// Configuration of stdio.h
-//----------------------------------------------------------------------------
-int stdio_put_char(char c, FILE *stream)
-{
      b5e:	cf 93       	push	r28
      b60:	c8 2f       	mov	r28, r24
-    os_enterCriticalSection();
      b62:	58 d3       	rcall	.+1712   	; 0x1214 <os_enterCriticalSection>
-
-    terminal_writeChar(c);
      b64:	8c 2f       	mov	r24, r28
      b66:	ef df       	rcall	.-34     	; 0xb46 <terminal_writeChar>
-    if (c == '\n') { terminal_writeProgString(PSTR("        ")); }
      b68:	ca 30       	cpi	r28, 0x0A	; 10
      b6a:	19 f4       	brne	.+6      	; 0xb72 <stdio_put_char+0x14>
      b6c:	86 e9       	ldi	r24, 0x96	; 150
      b6e:	91 e0       	ldi	r25, 0x01	; 1
-
-    os_leaveCriticalSection();
      b70:	f4 df       	rcall	.-24     	; 0xb5a <terminal_writeProgString>
      b72:	6f d3       	rcall	.+1758   	; 0x1252 <os_leaveCriticalSection>
-    return 0;
-}
      b74:	80 e0       	ldi	r24, 0x00	; 0
      b76:	90 e0       	ldi	r25, 0x00	; 0
      b78:	cf 91       	pop	r28
      b7a:	08 95       	ret
 
 00000b7c <terminal_newLine>:
-/*!
- *  Write a new line
- */
-void terminal_newLine()
-{
-    terminal_writeChar('\n');
      b7c:	8a e0       	ldi	r24, 0x0A	; 10
      b7e:	e3 cf       	rjmp	.-58     	; 0xb46 <terminal_writeChar>
      b80:	08 95       	ret
 
 00000b82 <terminal_log_printf_p>:
-    os_leaveCriticalSection();
-    return 0;
-}
-
-void terminal_log_printf_p(const char *prefix, const char *fmt, ...)
-{
      b82:	0f 93       	push	r16
      b84:	1f 93       	push	r17
      b86:	cf 93       	push	r28
      b88:	df 93       	push	r29
      b8a:	cd b7       	in	r28, 0x3d	; 61
      b8c:	de b7       	in	r29, 0x3e	; 62
-    os_enterCriticalSection();
      b8e:	42 d3       	rcall	.+1668   	; 0x1214 <os_enterCriticalSection>
-
-    terminal_writeProgString(prefix);
      b90:	88 85       	ldd	r24, Y+8	; 0x08
      b92:	99 85       	ldd	r25, Y+9	; 0x09
      b94:	e2 df       	rcall	.-60     	; 0xb5a <terminal_writeProgString>
-
-    va_list args;
-    va_start(args, fmt);
-    stdout->flags |= __SPGM;
      b96:	06 e1       	ldi	r16, 0x16	; 22
      b98:	14 e0       	ldi	r17, 0x04	; 4
      b9a:	d8 01       	movw	r26, r16
@@ -1477,7 +1278,6 @@ void terminal_log_printf_p(const char *prefix, const char *fmt, ...)
      ba4:	83 81       	ldd	r24, Z+3	; 0x03
      ba6:	88 60       	ori	r24, 0x08	; 8
      ba8:	83 83       	std	Z+3, r24	; 0x03
-    vfprintf_P(stdout, fmt, args);
      baa:	ae 01       	movw	r20, r28
      bac:	44 5f       	subi	r20, 0xF4	; 244
      bae:	5f 4f       	sbci	r21, 0xFF	; 255
@@ -1488,7 +1288,6 @@ void terminal_log_printf_p(const char *prefix, const char *fmt, ...)
      bb8:	9c 91       	ld	r25, X
      bba:	13 97       	sbiw	r26, 0x03	; 3
      bbc:	0e 94 ab 10 	call	0x2156	; 0x2156 <vfprintf_P>
-    stdout->flags &= ~__SPGM;
      bc0:	d8 01       	movw	r26, r16
      bc2:	12 96       	adiw	r26, 0x02	; 2
      bc4:	ed 91       	ld	r30, X+
@@ -1496,16 +1295,10 @@ void terminal_log_printf_p(const char *prefix, const char *fmt, ...)
      bc8:	13 97       	sbiw	r26, 0x03	; 3
      bca:	83 81       	ldd	r24, Z+3	; 0x03
      bcc:	87 7f       	andi	r24, 0xF7	; 247
-    va_end(args);
-
-    terminal_newLine();
      bce:	83 83       	std	Z+3, r24	; 0x03
      bd0:	d5 df       	rcall	.-86     	; 0xb7c <terminal_newLine>
-
-    os_leaveCriticalSection();
      bd2:	3f d3       	rcall	.+1662   	; 0x1252 <os_leaveCriticalSection>
      bd4:	df 91       	pop	r29
-}
      bd6:	cf 91       	pop	r28
      bd8:	1f 91       	pop	r17
      bda:	0f 91       	pop	r16
@@ -1513,12 +1306,6 @@ void terminal_log_printf_p(const char *prefix, const char *fmt, ...)
 
 00000bde <__vector_25>:
      bde:	1f 92       	push	r1
- * Disables the RX/TX ports to not provide the connected device with energy
- */
-void uart2_disable()
-{
-	cbi(UART2_CONTROL, UART2_BIT_RXEN);
-	cbi(UART2_CONTROL, UART2_BIT_TXEN);
      be0:	0f 92       	push	r0
      be2:	0f b6       	in	r0, 0x3f	; 63
      be4:	0f 92       	push	r0
@@ -1777,12 +1564,6 @@ void uart2_disable()
      e12:	18 95       	reti
 
 00000e14 <__vector_54>:
-ISR(UART3_RECEIVE_INTERRUPT)
-/*************************************************************************
-Function: UART3 Receive Complete interrupt
-Purpose:  called when the UART3 has received a character
-**************************************************************************/
-{
      e14:	1f 92       	push	r1
      e16:	0f 92       	push	r0
      e18:	0f b6       	in	r0, 0x3f	; 63
@@ -1795,59 +1576,24 @@ Purpose:  called when the UART3 has received a character
      e26:	9f 93       	push	r25
      e28:	ef 93       	push	r30
      e2a:	ff 93       	push	r31
-    unsigned char usr;
-    unsigned char lastRxError;
- 
- 
-    /* read UART status register and UART data register */ 
-    usr  = UART3_STATUS;
      e2c:	80 91 30 01 	lds	r24, 0x0130	; 0x800130 <__TEXT_REGION_LENGTH__+0x7c0130>
-    data = UART3_DATA;
      e30:	20 91 36 01 	lds	r18, 0x0136	; 0x800136 <__TEXT_REGION_LENGTH__+0x7c0136>
-    
-    /* get FEn (Frame Error) DORn (Data OverRun) UPEn (USART Parity Error) bits */
-    lastRxError = usr & (_BV(FE1)|_BV(DOR1)|_BV(UPE1) );
      e34:	8c 71       	andi	r24, 0x1C	; 28
-            
-    /* calculate buffer index */ 
-    tmphead = ( UART3_RxHead + 1) & UART3_RX_BUFFER_MASK;
      e36:	e0 91 28 02 	lds	r30, 0x0228	; 0x800228 <UART3_RxHead>
      e3a:	ef 5f       	subi	r30, 0xFF	; 255
-    
-    if ( tmphead == UART3_RxTail ) {
      e3c:	90 91 27 02 	lds	r25, 0x0227	; 0x800227 <UART3_RxTail>
      e40:	e9 17       	cp	r30, r25
      e42:	39 f0       	breq	.+14     	; 0xe52 <__vector_54+0x3e>
-        /* error: receive buffer overflow */
-        lastRxError = UART_BUFFER_OVERFLOW >> 8;
-    }else{
-        /* store new index */
-        UART3_RxHead = tmphead;
      e44:	e0 93 28 02 	sts	0x0228, r30	; 0x800228 <UART3_RxHead>
-        /* store received data in buffer */
-        UART3_RxBuf[tmphead] = data;
      e48:	f0 e0       	ldi	r31, 0x00	; 0
      e4a:	e5 5d       	subi	r30, 0xD5	; 213
      e4c:	fd 4f       	sbci	r31, 0xFD	; 253
      e4e:	20 83       	st	Z, r18
      e50:	01 c0       	rjmp	.+2      	; 0xe54 <__vector_54+0x40>
-    /* calculate buffer index */ 
-    tmphead = ( UART3_RxHead + 1) & UART3_RX_BUFFER_MASK;
-    
-    if ( tmphead == UART3_RxTail ) {
-        /* error: receive buffer overflow */
-        lastRxError = UART_BUFFER_OVERFLOW >> 8;
      e52:	82 e0       	ldi	r24, 0x02	; 2
-        /* store new index */
-        UART3_RxHead = tmphead;
-        /* store received data in buffer */
-        UART3_RxBuf[tmphead] = data;
-    }
-    UART3_LastRxError |= lastRxError;   
      e54:	90 91 26 02 	lds	r25, 0x0226	; 0x800226 <UART3_LastRxError>
      e58:	89 2b       	or	r24, r25
      e5a:	80 93 26 02 	sts	0x0226, r24	; 0x800226 <UART3_LastRxError>
-}
      e5e:	ff 91       	pop	r31
      e60:	ef 91       	pop	r30
      e62:	9f 91       	pop	r25
@@ -1862,12 +1608,6 @@ Purpose:  called when the UART3 has received a character
      e74:	18 95       	reti
 
 00000e76 <__vector_55>:
-ISR(UART3_TRANSMIT_INTERRUPT)
-/*************************************************************************
-Function: UART3 Data Register Empty interrupt
-Purpose:  called when the UART3 is ready to transmit the next byte
-**************************************************************************/
-{
      e76:	1f 92       	push	r1
      e78:	0f 92       	push	r0
      e7a:	0f b6       	in	r0, 0x3f	; 63
@@ -1879,38 +1619,24 @@ Purpose:  called when the UART3 is ready to transmit the next byte
      e86:	9f 93       	push	r25
      e88:	ef 93       	push	r30
      e8a:	ff 93       	push	r31
-    unsigned char tmptail;
-
-    
-    if ( UART3_TxHead != UART3_TxTail) {
      e8c:	90 91 2a 02 	lds	r25, 0x022A	; 0x80022a <UART3_TxHead>
      e90:	80 91 29 02 	lds	r24, 0x0229	; 0x800229 <UART3_TxTail>
      e94:	98 17       	cp	r25, r24
      e96:	61 f0       	breq	.+24     	; 0xeb0 <__vector_55+0x3a>
-        /* calculate and store new buffer index */
-        tmptail = (UART3_TxTail + 1) & UART3_TX_BUFFER_MASK;
      e98:	e0 91 29 02 	lds	r30, 0x0229	; 0x800229 <UART3_TxTail>
      e9c:	ef 5f       	subi	r30, 0xFF	; 255
-        UART3_TxTail = tmptail;
      e9e:	e0 93 29 02 	sts	0x0229, r30	; 0x800229 <UART3_TxTail>
-        /* get one byte from buffer and write it to UART */
-        UART3_DATA = UART3_TxBuf[tmptail];  /* start transmission */
      ea2:	f0 e0       	ldi	r31, 0x00	; 0
      ea4:	e5 5d       	subi	r30, 0xD5	; 213
      ea6:	fd 4f       	sbci	r31, 0xFD	; 253
      ea8:	80 81       	ld	r24, Z
      eaa:	80 93 36 01 	sts	0x0136, r24	; 0x800136 <__TEXT_REGION_LENGTH__+0x7c0136>
      eae:	05 c0       	rjmp	.+10     	; 0xeba <__vector_55+0x44>
-    }else{
-        /* tx buffer empty, disable UDRE interrupt */
-        UART3_CONTROL &= ~_BV(UART3_UDRIE);
      eb0:	e1 e3       	ldi	r30, 0x31	; 49
      eb2:	f1 e0       	ldi	r31, 0x01	; 1
      eb4:	80 81       	ld	r24, Z
      eb6:	8f 7d       	andi	r24, 0xDF	; 223
      eb8:	80 83       	st	Z, r24
-    }
-}
      eba:	ff 91       	pop	r31
      ebc:	ef 91       	pop	r30
      ebe:	9f 91       	pop	r25
@@ -1924,12 +1650,6 @@ Purpose:  called when the UART3 is ready to transmit the next byte
      ece:	18 95       	reti
 
 00000ed0 <__vector_21>:
-
-/*!
- *  ISR that counts the number of occurred Timer 0 compare matches for the getSystemTime function mainly used in delayMs.
- */
-ISR(TIMER0_COMPA_vect)
-{
      ed0:	1f 92       	push	r1
      ed2:	0f 92       	push	r0
      ed4:	0f b6       	in	r0, 0x3f	; 63
@@ -1939,7 +1659,6 @@ ISR(TIMER0_COMPA_vect)
      edc:	9f 93       	push	r25
      ede:	af 93       	push	r26
      ee0:	bf 93       	push	r27
-	++os_coarseSystemTime;
      ee2:	80 91 7f 03 	lds	r24, 0x037F	; 0x80037f <os_coarseSystemTime>
      ee6:	90 91 80 03 	lds	r25, 0x0380	; 0x800380 <os_coarseSystemTime+0x1>
      eea:	a0 91 81 03 	lds	r26, 0x0381	; 0x800381 <os_coarseSystemTime+0x2>
@@ -1951,7 +1670,6 @@ ISR(TIMER0_COMPA_vect)
      efc:	90 93 80 03 	sts	0x0380, r25	; 0x800380 <os_coarseSystemTime+0x1>
      f00:	a0 93 81 03 	sts	0x0381, r26	; 0x800381 <os_coarseSystemTime+0x2>
      f04:	b0 93 82 03 	sts	0x0382, r27	; 0x800382 <os_coarseSystemTime+0x3>
-}
      f08:	bf 91       	pop	r27
      f0a:	af 91       	pop	r26
      f0c:	9f 91       	pop	r25
@@ -1963,42 +1681,24 @@ ISR(TIMER0_COMPA_vect)
      f18:	18 95       	reti
 
 00000f1a <initSystemTime>:
-/*!
- *  Initializes Timer 0 as system clock
- */
-void initSystemTime(void)
-{
-	os_coarseSystemTime = 0;
      f1a:	10 92 7f 03 	sts	0x037F, r1	; 0x80037f <os_coarseSystemTime>
      f1e:	10 92 80 03 	sts	0x0380, r1	; 0x800380 <os_coarseSystemTime+0x1>
      f22:	10 92 81 03 	sts	0x0381, r1	; 0x800381 <os_coarseSystemTime+0x2>
      f26:	10 92 82 03 	sts	0x0382, r1	; 0x800382 <os_coarseSystemTime+0x3>
-
-	// Init timer 0 with prescaler 64
-	sbi(TCCR0B, CS00);
      f2a:	85 b5       	in	r24, 0x25	; 37
      f2c:	81 60       	ori	r24, 0x01	; 1
      f2e:	85 bd       	out	0x25, r24	; 37
-	sbi(TCCR0B, CS01);
      f30:	85 b5       	in	r24, 0x25	; 37
      f32:	82 60       	ori	r24, 0x02	; 2
      f34:	85 bd       	out	0x25, r24	; 37
-	cbi(TCCR0B, CS02);
      f36:	85 b5       	in	r24, 0x25	; 37
      f38:	8b 7f       	andi	r24, 0xFB	; 251
      f3a:	85 bd       	out	0x25, r24	; 37
-
-	// CTC mode
-	sbi(TCCR0A, WGM01);
      f3c:	84 b5       	in	r24, 0x24	; 36
      f3e:	82 60       	ori	r24, 0x02	; 2
      f40:	84 bd       	out	0x24, r24	; 36
-
-	// Compare Match after 61 timer ticks = 1ms
-	OCR0A = TIMER_OCR;
      f42:	89 ef       	ldi	r24, 0xF9	; 249
      f44:	87 bd       	out	0x27, r24	; 39
-	sbi(TIMSK0, OCIE0A);
      f46:	ee e6       	ldi	r30, 0x6E	; 110
      f48:	f0 e0       	ldi	r31, 0x00	; 0
      f4a:	80 81       	ld	r24, Z
@@ -2007,23 +1707,14 @@ void initSystemTime(void)
      f50:	08 95       	ret
 
 00000f52 <getSystemTime_ms>:
- */
-time_t getSystemTime_ms(void)
-{
-	// In case interrupts are off we check the OCF manually, clear it and
-	// increment os_coarseSystemTime to avoid freezing the system time
-	if (!gbi(SREG, 7) && gbi(TIFR0, OCF0A))
      f52:	0f b6       	in	r0, 0x3f	; 63
      f54:	07 fc       	sbrc	r0, 7
      f56:	18 c0       	rjmp	.+48     	; 0xf88 <getSystemTime_ms+0x36>
      f58:	a9 9b       	sbis	0x15, 1	; 21
      f5a:	16 c0       	rjmp	.+44     	; 0xf88 <getSystemTime_ms+0x36>
-	{
-		sbi(TIFR0, OCF0A);
      f5c:	85 b3       	in	r24, 0x15	; 21
      f5e:	82 60       	ori	r24, 0x02	; 2
      f60:	85 bb       	out	0x15, r24	; 21
-		++os_coarseSystemTime;
      f62:	80 91 7f 03 	lds	r24, 0x037F	; 0x80037f <os_coarseSystemTime>
      f66:	90 91 80 03 	lds	r25, 0x0380	; 0x800380 <os_coarseSystemTime+0x1>
      f6a:	a0 91 81 03 	lds	r26, 0x0381	; 0x800381 <os_coarseSystemTime+0x2>
@@ -2035,41 +1726,22 @@ time_t getSystemTime_ms(void)
      f7c:	90 93 80 03 	sts	0x0380, r25	; 0x800380 <os_coarseSystemTime+0x1>
      f80:	a0 93 81 03 	sts	0x0381, r26	; 0x800381 <os_coarseSystemTime+0x2>
      f84:	b0 93 82 03 	sts	0x0382, r27	; 0x800382 <os_coarseSystemTime+0x3>
-	}
-
-	// Synchronize access to os_coarseSystemTime
-	uint8_t ie = gbi(SREG, 7);
      f88:	8f b7       	in	r24, 0x3f	; 63
      f8a:	28 2f       	mov	r18, r24
      f8c:	22 1f       	adc	r18, r18
      f8e:	22 27       	eor	r18, r18
      f90:	22 1f       	adc	r18, r18
-	cli();
      f92:	f8 94       	cli
-	time_t t = os_coarseSystemTime;
      f94:	60 91 7f 03 	lds	r22, 0x037F	; 0x80037f <os_coarseSystemTime>
      f98:	70 91 80 03 	lds	r23, 0x0380	; 0x800380 <os_coarseSystemTime+0x1>
      f9c:	80 91 81 03 	lds	r24, 0x0381	; 0x800381 <os_coarseSystemTime+0x2>
      fa0:	90 91 82 03 	lds	r25, 0x0382	; 0x800382 <os_coarseSystemTime+0x3>
-	if (ie)
      fa4:	22 23       	and	r18, r18
      fa6:	09 f0       	breq	.+2      	; 0xfaa <getSystemTime_ms+0x58>
-	{
-		sei();
      fa8:	78 94       	sei
-	}
-
-	return t;
-}
      faa:	08 95       	ret
 
 00000fac <delayMs>:
- *  in order to get the destination time. Then, we wait until a temporary variable reaches this value.
- *
- *  \param ms  The time to be waited in milliseconds (max. 65535)
- */
-void delayMs(uint16_t ms)
-{
      fac:	cf 92       	push	r12
      fae:	df 92       	push	r13
      fb0:	ef 92       	push	r14
@@ -2078,23 +1750,12 @@ void delayMs(uint16_t ms)
      fb6:	1f 93       	push	r17
      fb8:	cf 93       	push	r28
      fba:	df 93       	push	r29
-#ifdef RUNNING_WITH_SIMULATOR
-	return;
-#endif
-
-	if (ms == 0)
      fbc:	00 97       	sbiw	r24, 0x00	; 0
      fbe:	d1 f0       	breq	.+52     	; 0xff4 <delayMs+0x48>
      fc0:	ec 01       	movw	r28, r24
-	{
-		return;
-	}
-	time_t startTime = getSystemTime_ms();
      fc2:	c7 df       	rcall	.-114    	; 0xf52 <getSystemTime_ms>
      fc4:	6b 01       	movw	r12, r22
      fc6:	7c 01       	movw	r14, r24
-
-	while (getSystemTime_ms() - startTime < ms)
      fc8:	06 c0       	rjmp	.+12     	; 0xfd6 <delayMs+0x2a>
 	#else
 		//round up by default
@@ -2123,10 +1784,6 @@ void delayMs(uint16_t ms)
      fee:	a2 07       	cpc	r26, r18
      ff0:	b3 07       	cpc	r27, r19
      ff2:	58 f3       	brcs	.-42     	; 0xfca <delayMs+0x1e>
-	{
-		_delay_us(100);
-	}
-}
      ff4:	df 91       	pop	r29
      ff6:	cf 91       	pop	r28
      ff8:	1f 91       	pop	r17
@@ -2138,29 +1795,18 @@ void delayMs(uint16_t ms)
     1004:	08 95       	ret
 
 00001006 <assertPstr>:
- *
- *  \param exp The boolean expression that is expected to be true.
- *  \param errormsg The string that shall be shown as an error message if the given expression is false as progmem string.
- */
-void assertPstr(bool exp, const char *errormsg, ...)
-{
     1006:	cf 93       	push	r28
     1008:	df 93       	push	r29
     100a:	cd b7       	in	r28, 0x3d	; 61
     100c:	de b7       	in	r29, 0x3e	; 62
     100e:	9f 81       	ldd	r25, Y+7	; 0x07
     1010:	28 85       	ldd	r18, Y+8	; 0x08
-	if (!exp)
     1012:	8e 81       	ldd	r24, Y+6	; 0x06
     1014:	81 11       	cpse	r24, r1
     1016:	0c c0       	rjmp	.+24     	; 0x1030 <assertPstr+0x2a>
-	{
-		va_list args;
-		va_start(args, errormsg);
     1018:	ae 01       	movw	r20, r28
     101a:	47 5f       	subi	r20, 0xF7	; 247
     101c:	5f 4f       	sbci	r21, 0xFF	; 255
-		os_errorPstr(errormsg, args);
     101e:	5f 93       	push	r21
     1020:	4f 93       	push	r20
     1022:	2f 93       	push	r18
@@ -2170,114 +1816,63 @@ void assertPstr(bool exp, const char *errormsg, ...)
     102a:	0f 90       	pop	r0
     102c:	0f 90       	pop	r0
     102e:	0f 90       	pop	r0
-		va_end(args);
-	}
     1030:	df 91       	pop	r29
     1032:	cf 91       	pop	r28
     1034:	08 95       	ret
 
 00001036 <main>:
-//! Program's entry point
-int main(void)
-{
-	// Give the operating system a chance to initialize its private data.
-	// This also registers and starts the idle program.
-	os_init();
     1036:	21 d0       	rcall	.+66     	; 0x107a <os_init>
-
-	// os_init shows a boot message
-	// Wait and clear the LCD
-	delayMs(600);
     1038:	88 e5       	ldi	r24, 0x58	; 88
     103a:	92 e0       	ldi	r25, 0x02	; 2
-	lcd_clear();
     103c:	b7 df       	rcall	.-146    	; 0xfac <delayMs>
     103e:	79 db       	rcall	.-2318   	; 0x732 <lcd_clear>
-
-	// Start the operating system
-	os_startScheduler();
     1040:	3c d1       	rcall	.+632    	; 0x12ba <os_startScheduler>
     1042:	81 e0       	ldi	r24, 0x01	; 1
-
-	return 1;
     1044:	90 e0       	ldi	r25, 0x00	; 0
     1046:	08 95       	ret
 
 00001048 <os_initTimer>:
     1048:	e0 eb       	ldi	r30, 0xB0	; 176
- *  Initializes the used timers.
- */
-void os_initTimer(void)
-{
-	// Init timer 2 (Scheduler)
-	sbi(TCCR2A, WGM21); // Clear on timer compare match
     104a:	f0 e0       	ldi	r31, 0x00	; 0
     104c:	80 81       	ld	r24, Z
     104e:	82 60       	ori	r24, 0x02	; 2
     1050:	80 83       	st	Z, r24
-
-	sbi(TCCR2B, CS22);	 // Prescaler 1024  1
     1052:	e1 eb       	ldi	r30, 0xB1	; 177
     1054:	f0 e0       	ldi	r31, 0x00	; 0
     1056:	80 81       	ld	r24, Z
     1058:	84 60       	ori	r24, 0x04	; 4
     105a:	80 83       	st	Z, r24
-	sbi(TCCR2B, CS21);	 // Prescaler 1024  1
     105c:	80 81       	ld	r24, Z
     105e:	82 60       	ori	r24, 0x02	; 2
     1060:	80 83       	st	Z, r24
-	sbi(TCCR2B, CS20);	 // Prescaler 1024  1
     1062:	80 81       	ld	r24, Z
     1064:	81 60       	ori	r24, 0x01	; 1
     1066:	80 83       	st	Z, r24
-	sbi(TIMSK2, OCIE2A); // Enable interrupt
     1068:	e0 e7       	ldi	r30, 0x70	; 112
     106a:	f0 e0       	ldi	r31, 0x00	; 0
     106c:	80 81       	ld	r24, Z
     106e:	82 60       	ori	r24, 0x02	; 2
     1070:	80 83       	st	Z, r24
-	OCR2A = 60;
     1072:	8c e3       	ldi	r24, 0x3C	; 60
     1074:	80 93 b3 00 	sts	0x00B3, r24	; 0x8000b3 <__TEXT_REGION_LENGTH__+0x7c00b3>
     1078:	08 95       	ret
 
 0000107a <os_init>:
- *  Readies stack, scheduler and heap for first use. Additionally, the LCD is initialized. In order to do those tasks,
- *  it calls the subfunction os_initScheduler().
- */
-void os_init()
-{
-	initSystemTime();
     107a:	4f df       	rcall	.-354    	; 0xf1a <initSystemTime>
-	os_initTimer();
     107c:	e5 df       	rcall	.-54     	; 0x1048 <os_initTimer>
-	stopWatch_init();
     107e:	0e dd       	rcall	.-1508   	; 0xa9c <stopWatch_init>
-
-	// Init LCD display
-	lcd_init();
     1080:	13 db       	rcall	.-2522   	; 0x6a8 <lcd_init>
-	terminal_init();
     1082:	59 dd       	rcall	.-1358   	; 0xb36 <terminal_init>
-
-	// display on
-	lcd_displayOn();
     1084:	63 db       	rcall	.-2362   	; 0x74c <lcd_displayOn>
     1086:	55 db       	rcall	.-2390   	; 0x732 <lcd_clear>
-	lcd_clear();
     1088:	84 e7       	ldi	r24, 0x74	; 116
-
-	lcd_writeProgString(PSTR("Booting DEOS ..."));
     108a:	92 e0       	ldi	r25, 0x02	; 2
     108c:	de db       	rcall	.-2116   	; 0x84a <lcd_writeProgString>
     108e:	8e e3       	ldi	r24, 0x3E	; 62
     1090:	92 e0       	ldi	r25, 0x02	; 2
-
-	terminal_writeProgString(PSTR("\n\n##################################################\n"));
     1092:	63 dd       	rcall	.-1338   	; 0xb5a <terminal_writeProgString>
     1094:	8d e2       	ldi	r24, 0x2D	; 45
     1096:	92 e0       	ldi	r25, 0x02	; 2
-	INFO("Booting DEOS ...");
     1098:	9f 93       	push	r25
     109a:	8f 93       	push	r24
     109c:	84 e2       	ldi	r24, 0x24	; 36
@@ -2288,7 +1883,6 @@ void os_init()
     10a6:	83 e0       	ldi	r24, 0x03	; 3
     10a8:	8f 93       	push	r24
     10aa:	88 ee       	ldi	r24, 0xE8	; 232
-	INFO("Used global vars: %d/%d bytes", (uint16_t)&__heap_start - AVR_SRAM_START, STACK_OFFSET);
     10ac:	8f 93       	push	r24
     10ae:	8c e1       	ldi	r24, 0x1C	; 28
     10b0:	92 e0       	ldi	r25, 0x02	; 2
@@ -2305,14 +1899,10 @@ void os_init()
     10c6:	5d dd       	rcall	.-1350   	; 0xb82 <terminal_log_printf_p>
     10c8:	89 ec       	ldi	r24, 0xC9	; 201
     10ca:	91 e0       	ldi	r25, 0x01	; 1
-	terminal_writeProgString(PSTR("--------------------------------------------------\n"));
     10cc:	46 dd       	rcall	.-1396   	; 0xb5a <terminal_writeProgString>
     10ce:	88 ea       	ldi	r24, 0xA8	; 168
     10d0:	91 e0       	ldi	r25, 0x01	; 1
     10d2:	9f 93       	push	r25
-
-	// Security check if the stack crushes global variables
-	assert((uint16_t)&__heap_start < AVR_SRAM_START + STACK_OFFSET, " Stack collides with global vars");
     10d4:	8f 93       	push	r24
     10d6:	81 e0       	ldi	r24, 0x01	; 1
     10d8:	2c e1       	ldi	r18, 0x1C	; 28
@@ -2325,11 +1915,8 @@ void os_init()
     10e6:	8f df       	rcall	.-226    	; 0x1006 <assertPstr>
     10e8:	0d d2       	rcall	.+1050   	; 0x1504 <os_initScheduler>
     10ea:	8d b7       	in	r24, 0x3d	; 61
-
-	os_initScheduler();
     10ec:	9e b7       	in	r25, 0x3e	; 62
     10ee:	0f 96       	adiw	r24, 0x0f	; 15
-}
     10f0:	0f b6       	in	r0, 0x3f	; 63
     10f2:	f8 94       	cli
     10f4:	9e bf       	out	0x3e, r25	; 62
@@ -2341,47 +1928,24 @@ void os_init()
     10fc:	cf 93       	push	r28
     10fe:	df 93       	push	r29
     1100:	cd b7       	in	r28, 0x3d	; 61
- *
- *  \param msg The error to be displayed as progmem string
- *  \param ... Formatting arguments for the error message
- */
-void os_errorPstr(const char *msg, ...)
-{
     1102:	de b7       	in	r29, 0x3e	; 62
     1104:	1e 81       	ldd	r17, Y+6	; 0x06
     1106:	0f 81       	ldd	r16, Y+7	; 0x07
-	cli();
     1108:	f8 94       	cli
-
-	// Make sure we have enough stack left for sure (we can mess with it because we won't go out of this function)
-	SP = BOTTOM_OF_MAIN_STACK;
     110a:	8f ef       	ldi	r24, 0xFF	; 255
     110c:	91 e2       	ldi	r25, 0x21	; 33
     110e:	9e bf       	out	0x3e, r25	; 62
     1110:	8d bf       	out	0x3d, r24	; 61
-
-	// Clear display and write error message
-	lcd_clear();
     1112:	0f db       	rcall	.-2530   	; 0x732 <lcd_clear>
-
-	// Print error message to lcd (variadic arguments)
-	va_list args;
-	va_start(args, msg);
     1114:	ce 01       	movw	r24, r28
     1116:	08 96       	adiw	r24, 0x08	; 8
-	lcd_printf_p(msg, args);
     1118:	9f 93       	push	r25
     111a:	8f 93       	push	r24
     111c:	0f 93       	push	r16
     111e:	1f 93       	push	r17
     1120:	86 da       	rcall	.-2804   	; 0x62e <lcd_printf_p>
-	va_end(args);
-
-	// Print error message to terminal (variadic arguments)
-	va_start(args, msg);
     1122:	ce 01       	movw	r24, r28
     1124:	08 96       	adiw	r24, 0x08	; 8
-	terminal_log_printf_p(PSTR("[ERROR] "), msg, args);
     1126:	9f 93       	push	r25
     1128:	8f 93       	push	r24
     112a:	0f 93       	push	r16
@@ -2395,12 +1959,6 @@ void os_errorPstr(const char *msg, ...)
     113a:	f8 94       	cli
     113c:	de bf       	out	0x3e, r29	; 62
     113e:	0f be       	out	0x3f, r0	; 63
-	va_end(args);
-
-	// Catch system in this infinite loop and play a small animation to indicate an error
-	while (1)
-	{
-		lcd_displayOn();
     1140:	cd bf       	out	0x3d, r28	; 61
     1142:	04 db       	rcall	.-2552   	; 0x74c <lcd_displayOn>
 	#else
@@ -2417,8 +1975,6 @@ void os_errorPstr(const char *msg, ...)
     114e:	80 40       	sbci	r24, 0x00	; 0
     1150:	e1 f7       	brne	.-8      	; 0x114a <os_errorPstr+0x4e>
     1152:	00 c0       	rjmp	.+0      	; 0x1154 <os_errorPstr+0x58>
-		_delay_ms(1500);
-		lcd_displayOff();
     1154:	00 00       	nop
     1156:	fd da       	rcall	.-2566   	; 0x752 <lcd_displayOff>
     1158:	9f ef       	ldi	r25, 0xFF	; 255
@@ -2433,12 +1989,6 @@ void os_errorPstr(const char *msg, ...)
     116a:	eb cf       	rjmp	.-42     	; 0x1142 <os_errorPstr+0x46>
 
 0000116c <prog0>:
-
-/*!
- *  This is the idle program. The idle process owns all the memory
- *  and processor time no other process wants to have.
- */
-PROGRAM(0, AUTOSTART)
     116c:	c0 e0       	ldi	r28, 0x00	; 0
     116e:	d0 e0       	ldi	r29, 0x00	; 0
     1170:	06 c0       	rjmp	.+12     	; 0x117e <prog0+0x12>
@@ -2616,31 +2166,15 @@ PROGRAM(0, AUTOSTART)
     12b8:	08 95       	ret
 
 000012ba <os_startScheduler>:
-void os_startScheduler(void)
-{
-	#warning [Praktikum 1] Implement here
-	
-	 // Set currentProc to idle process
-	 currentProc = 0;
     12ba:	10 92 7c 03 	sts	0x037C, r1	; 0x80037c <currentProc>
-
-	 // Set the state of the now chosen process to running
-	 os_processes[currentProc].state = OS_PS_RUNNING;
     12be:	e3 e8       	ldi	r30, 0x83	; 131
     12c0:	f3 e0       	ldi	r31, 0x03	; 3
     12c2:	82 e0       	ldi	r24, 0x02	; 2
     12c4:	81 83       	std	Z+1, r24	; 0x01
-
-	 // Set SP on the stack of the idle process, this will cause the idle process to start running,
-	 // as the SP now points onto the idle functions address
-	 SP = os_processes[currentProc].sp.as_int;
     12c6:	82 81       	ldd	r24, Z+2	; 0x02
     12c8:	93 81       	ldd	r25, Z+3	; 0x03
     12ca:	9e bf       	out	0x3e, r25	; 62
     12cc:	8d bf       	out	0x3d, r24	; 61
-
-	 // Load initial context and start the idle process
-	 restoreContext();
     12ce:	0f 90       	pop	r0
     12d0:	1f 90       	pop	r1
     12d2:	2f 90       	pop	r2
@@ -2676,28 +2210,16 @@ void os_startScheduler(void)
     130e:	ff bf       	out	0x3f, r31	; 63
     1310:	ff 91       	pop	r31
     1312:	18 95       	reti
-
-	 os_error("os_startScheduler() terminated against all odds - scary stuff...");
     1314:	85 e8       	ldi	r24, 0x85	; 133
     1316:	92 e0       	ldi	r25, 0x02	; 2
     1318:	9f 93       	push	r25
     131a:	8f 93       	push	r24
     131c:	ef de       	rcall	.-546    	; 0x10fc <os_errorPstr>
-	 // You should never get here, as the scheduler must not terminate
-	
-
-}
     131e:	0f 90       	pop	r0
     1320:	0f 90       	pop	r0
     1322:	08 95       	ret
 
 00001324 <os_getStackChecksum>:
- *
- *  \param pid The ID of the process for which the stack's checksum has to be calculated.
- *  \return The spare checksum of the pid'th stack.
- */
-stack_checksum_t os_getStackChecksum(process_id_t pid)
-{
     1324:	cf 92       	push	r12
     1326:	df 92       	push	r13
     1328:	ef 92       	push	r14
@@ -2705,12 +2227,6 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
     132c:	0f 93       	push	r16
     132e:	1f 93       	push	r17
     1330:	e8 2f       	mov	r30, r24
-	// Be aware of cases where the whole stack is less than 10 bytes
-	// (although this actually won't happen due to the call to saveContext() beforehand, which always puts 33 bytes on to the stack already)
-	
-	
-	stack_checksum_t checksum = 0;
-	uint8_t *stack_bottom = (uint8_t *)PROCESS_STACK_BOTTOM(pid);
     1332:	28 2f       	mov	r18, r24
     1334:	30 e0       	ldi	r19, 0x00	; 0
     1336:	a7 e6       	ldi	r26, 0x67	; 103
@@ -2728,7 +2244,6 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
     134e:	f9 0a       	sbc	r15, r25
     1350:	b7 01       	movw	r22, r14
     1352:	a6 01       	movw	r20, r12
-	uint8_t *stack_top = (uint8_t *)(os_processes[pid].sp.as_int);
     1354:	8e 2f       	mov	r24, r30
     1356:	90 e0       	ldi	r25, 0x00	; 0
     1358:	fc 01       	movw	r30, r24
@@ -2742,19 +2257,12 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
     1368:	fc 4f       	sbci	r31, 0xFC	; 252
     136a:	a2 81       	ldd	r26, Z+2	; 0x02
     136c:	b3 81       	ldd	r27, Z+3	; 0x03
-	uint8_t stack_size = stack_bottom - stack_top;
     136e:	4a 1b       	sub	r20, r26
-
-	if (stack_size >= 16)
     1370:	40 31       	cpi	r20, 0x10	; 16
     1372:	78 f4       	brcc	.+30     	; 0x1392 <os_getStackChecksum+0x6e>
     1374:	90 e0       	ldi	r25, 0x00	; 0
     1376:	80 e0       	ldi	r24, 0x00	; 0
     1378:	17 c0       	rjmp	.+46     	; 0x13a8 <os_getStackChecksum+0x84>
-	{
-		for (uint8_t i = 0; i < 16; i++)
-		{
-			checksum ^= stack_top[i * (stack_size / 16)];
     137a:	24 2f       	mov	r18, r20
     137c:	22 95       	swap	r18
     137e:	2f 70       	andi	r18, 0x0F	; 15
@@ -2765,12 +2273,6 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
     1388:	11 24       	eor	r1, r1
     138a:	20 81       	ld	r18, Z
     138c:	82 27       	eor	r24, r18
-	uint8_t *stack_top = (uint8_t *)(os_processes[pid].sp.as_int);
-	uint8_t stack_size = stack_bottom - stack_top;
-
-	if (stack_size >= 16)
-	{
-		for (uint8_t i = 0; i < 16; i++)
     138e:	9f 5f       	subi	r25, 0xFF	; 255
     1390:	02 c0       	rjmp	.+4      	; 0x1396 <os_getStackChecksum+0x72>
     1392:	90 e0       	ldi	r25, 0x00	; 0
@@ -2778,32 +2280,14 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
     1396:	90 31       	cpi	r25, 0x10	; 16
     1398:	80 f3       	brcs	.-32     	; 0x137a <os_getStackChecksum+0x56>
     139a:	08 c0       	rjmp	.+16     	; 0x13ac <os_getStackChecksum+0x88>
-	}
-	else
-	{
-		for (uint8_t i = 0; i < stack_size; i++)
-		{
-			checksum ^= stack_top[i];
     139c:	fd 01       	movw	r30, r26
     139e:	e9 0f       	add	r30, r25
     13a0:	f1 1d       	adc	r31, r1
     13a2:	20 81       	ld	r18, Z
     13a4:	82 27       	eor	r24, r18
-			checksum ^= stack_top[i * (stack_size / 16)];
-		}
-	}
-	else
-	{
-		for (uint8_t i = 0; i < stack_size; i++)
     13a6:	9f 5f       	subi	r25, 0xFF	; 255
     13a8:	94 17       	cp	r25, r20
     13aa:	c0 f3       	brcs	.-16     	; 0x139c <os_getStackChecksum+0x78>
-		}
-	}
-
-	return checksum;
-
-}
     13ac:	1f 91       	pop	r17
     13ae:	0f 91       	pop	r16
     13b0:	ff 90       	pop	r15
@@ -2813,12 +2297,6 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
     13b8:	08 95       	ret
 
 000013ba <os_exec>:
- *                  strategies.
- *  \return The index of the new process (throws error on failure and returns
- *          INVALID_PROCESS as specified in defines.h).
- */
-process_id_t os_exec(program_id_t programID, priority_t priority)
-{
     13ba:	ef 92       	push	r14
     13bc:	ff 92       	push	r15
     13be:	0f 93       	push	r16
@@ -2827,19 +2305,10 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     13c4:	df 93       	push	r29
     13c6:	e8 2e       	mov	r14, r24
     13c8:	f6 2e       	mov	r15, r22
-	// 1. Enter a critical section
-	os_enterCriticalSection();
     13ca:	24 df       	rcall	.-440    	; 0x1214 <os_enterCriticalSection>
-
-	// 2. Find free slot in os_processes array
-	int free_slot = -1;
-
-	for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
     13cc:	c0 e0       	ldi	r28, 0x00	; 0
     13ce:	d0 e0       	ldi	r29, 0x00	; 0
     13d0:	0d c0       	rjmp	.+26     	; 0x13ec <os_exec+0x32>
-	{
-		if (os_processes[i].state == OS_PS_UNUSED)
     13d2:	fe 01       	movw	r30, r28
     13d4:	ee 0f       	add	r30, r30
     13d6:	ff 1f       	adc	r31, r31
@@ -2852,37 +2321,16 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     13e4:	81 81       	ldd	r24, Z+1	; 0x01
     13e6:	88 23       	and	r24, r24
     13e8:	31 f0       	breq	.+12     	; 0x13f6 <os_exec+0x3c>
-	os_enterCriticalSection();
-
-	// 2. Find free slot in os_processes array
-	int free_slot = -1;
-
-	for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
     13ea:	21 96       	adiw	r28, 0x01	; 1
     13ec:	c8 30       	cpi	r28, 0x08	; 8
     13ee:	d1 05       	cpc	r29, r1
     13f0:	84 f3       	brlt	.-32     	; 0x13d2 <os_exec+0x18>
-{
-	// 1. Enter a critical section
-	os_enterCriticalSection();
-
-	// 2. Find free slot in os_processes array
-	int free_slot = -1;
     13f2:	cf ef       	ldi	r28, 0xFF	; 255
     13f4:	df ef       	ldi	r29, 0xFF	; 255
-			break;
-		}
-	}
-
-
-	if (free_slot == -1)
     13f6:	cf 3f       	cpi	r28, 0xFF	; 255
     13f8:	8f ef       	ldi	r24, 0xFF	; 255
     13fa:	d8 07       	cpc	r29, r24
     13fc:	81 f4       	brne	.+32     	; 0x141e <os_exec+0x64>
-	{
-		// os_error("No free slot available");
-		terminal_log_printf_p(PSTR("os_exec() -> "), PSTR("No free slot available\n"));
     13fe:	8a ee       	ldi	r24, 0xEA	; 234
     1400:	92 e0       	ldi	r25, 0x02	; 2
     1402:	9f 93       	push	r25
@@ -2891,22 +2339,14 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     1408:	92 e0       	ldi	r25, 0x02	; 2
     140a:	9f 93       	push	r25
     140c:	8f 93       	push	r24
-		os_leaveCriticalSection();
     140e:	b9 db       	rcall	.-2190   	; 0xb82 <terminal_log_printf_p>
     1410:	20 df       	rcall	.-448    	; 0x1252 <os_leaveCriticalSection>
-		return INVALID_PROCESS;
     1412:	0f 90       	pop	r0
     1414:	0f 90       	pop	r0
     1416:	0f 90       	pop	r0
     1418:	0f 90       	pop	r0
     141a:	1f ef       	ldi	r17, 0xFF	; 255
     141c:	6b c0       	rjmp	.+214    	; 0x14f4 <os_exec+0x13a>
-		os_leaveCriticalSection();
-		return INVALID_PROCESS;
-	}
-
-	// 4. Save ProgramID and the process' state (and some more)
-	os_processes[free_slot].progID = programID;
     141e:	8e 01       	movw	r16, r28
     1420:	00 0f       	add	r16, r16
     1422:	11 1f       	adc	r17, r17
@@ -2918,18 +2358,13 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     142e:	1c 4f       	sbci	r17, 0xFC	; 252
     1430:	d8 01       	movw	r26, r16
     1432:	ec 92       	st	X, r14
-	os_processes[free_slot].state = OS_PS_READY;
     1434:	81 e0       	ldi	r24, 0x01	; 1
     1436:	11 96       	adiw	r26, 0x01	; 1
     1438:	8c 93       	st	X, r24
     143a:	11 97       	sbiw	r26, 0x01	; 1
-	os_processes[free_slot].priority = priority;
     143c:	14 96       	adiw	r26, 0x04	; 4
     143e:	fc 92       	st	X, r15
     1440:	14 97       	sbiw	r26, 0x04	; 4
-
-	// Initialize the stack pointer
-	os_processes[free_slot].sp.as_int = PROCESS_STACK_BOTTOM(free_slot);
     1442:	87 e6       	ldi	r24, 0x67	; 103
     1444:	93 e0       	ldi	r25, 0x03	; 3
     1446:	c8 9f       	mul	r28, r24
@@ -2944,11 +2379,6 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     1458:	7c 01       	movw	r14, r24
     145a:	e2 1a       	sub	r14, r18
     145c:	f3 0a       	sbc	r15, r19
-
-	// 5.1 push the address of the function to the stack
-	// Note for task 2: use address of os_dispatcher instead
-
-	*os_processes[free_slot].sp.as_ptr-- = (uint8_t)(addressOfProgram(function));
     145e:	c7 01       	movw	r24, r14
     1460:	01 97       	sbiw	r24, 0x01	; 1
     1462:	13 96       	adiw	r26, 0x03	; 3
@@ -2960,7 +2390,6 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     146e:	8f de       	rcall	.-738    	; 0x118e <addressOfProgram>
     1470:	f7 01       	movw	r30, r14
     1472:	60 83       	st	Z, r22
-	*os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 8));
     1474:	d8 01       	movw	r26, r16
     1476:	12 96       	adiw	r26, 0x02	; 2
     1478:	ed 91       	ld	r30, X+
@@ -2974,7 +2403,6 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     1488:	2e 93       	st	-X, r18
     148a:	12 97       	sbiw	r26, 0x02	; 2
     148c:	70 83       	st	Z, r23
-	*os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 16));
     148e:	12 96       	adiw	r26, 0x02	; 2
     1490:	ed 91       	ld	r30, X+
     1492:	fc 91       	ld	r31, X
@@ -2987,13 +2415,8 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     14a0:	2e 93       	st	-X, r18
     14a2:	12 97       	sbiw	r26, 0x02	; 2
     14a4:	80 83       	st	Z, r24
-
-	// 5.2 leave space on the process stack for register entries
-	for (uint8_t i = 0; i < 33; i++)
     14a6:	80 e0       	ldi	r24, 0x00	; 0
     14a8:	12 c0       	rjmp	.+36     	; 0x14ce <os_exec+0x114>
-	{
-		*os_processes[free_slot].sp.as_ptr-- = 0;
     14aa:	fe 01       	movw	r30, r28
     14ac:	ee 0f       	add	r30, r30
     14ae:	ff 1f       	adc	r31, r31
@@ -3011,20 +2434,8 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     14c6:	33 83       	std	Z+3, r19	; 0x03
     14c8:	22 83       	std	Z+2, r18	; 0x02
     14ca:	1c 92       	st	X, r1
-	*os_processes[free_slot].sp.as_ptr-- = (uint8_t)(addressOfProgram(function));
-	*os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 8));
-	*os_processes[free_slot].sp.as_ptr-- = (uint8_t)((addressOfProgram(function) >> 16));
-
-	// 5.2 leave space on the process stack for register entries
-	for (uint8_t i = 0; i < 33; i++)
     14cc:	8f 5f       	subi	r24, 0xFF	; 255
     14ce:	81 32       	cpi	r24, 0x21	; 33
-	{
-		*os_processes[free_slot].sp.as_ptr-- = 0;
-	}
-
-	// For task 2: Save the stack checksum
-	os_processes[free_slot].checksum = os_getStackChecksum(free_slot);
     14d0:	60 f3       	brcs	.-40     	; 0x14aa <os_exec+0xf0>
     14d2:	1c 2f       	mov	r17, r28
     14d4:	8c 2f       	mov	r24, r28
@@ -3037,24 +2448,13 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
     14e2:	ee 0f       	add	r30, r30
     14e4:	ff 1f       	adc	r31, r31
     14e6:	ed 57       	subi	r30, 0x7D	; 125
-
-	os_resetProcessSchedulingInformation(os_getSchedulingStrategy(), free_slot);
     14e8:	fc 4f       	sbci	r31, 0xFC	; 252
     14ea:	85 83       	std	Z+5, r24	; 0x05
     14ec:	90 de       	rcall	.-736    	; 0x120e <os_getSchedulingStrategy>
     14ee:	6c 2f       	mov	r22, r28
     14f0:	fe d1       	rcall	.+1020   	; 0x18ee <os_resetProcessSchedulingInformation>
-
-	// 6. Leave Critical Section
-	os_leaveCriticalSection();
     14f2:	af de       	rcall	.-674    	; 0x1252 <os_leaveCriticalSection>
     14f4:	81 2f       	mov	r24, r17
-	return free_slot;
-	
-	
-	
-
-}
     14f6:	df 91       	pop	r29
     14f8:	cf 91       	pop	r28
     14fa:	1f 91       	pop	r17
@@ -3065,21 +2465,10 @@ process_id_t os_exec(program_id_t programID, priority_t priority)
 
 00001504 <os_initScheduler>:
     1504:	cf 93       	push	r28
- *  In order for the scheduler to work properly, it must have the chance to
- *  initialize its internal data-structures and register and start the idle
- *  program.
- */
-void os_initScheduler(void)
-{
     1506:	df 93       	push	r29
-	// 1.
-	// As the processes are just being initialized, all slots should be unused so far.
-	for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
     1508:	80 e0       	ldi	r24, 0x00	; 0
     150a:	90 e0       	ldi	r25, 0x00	; 0
     150c:	0b c0       	rjmp	.+22     	; 0x1524 <os_initScheduler+0x20>
-	{
-		os_processes[i].state = OS_PS_UNUSED;
     150e:	fc 01       	movw	r30, r24
     1510:	ee 0f       	add	r30, r30
     1512:	ff 1f       	adc	r31, r31
@@ -3090,12 +2479,6 @@ void os_initScheduler(void)
     151c:	ed 57       	subi	r30, 0x7D	; 125
     151e:	fc 4f       	sbci	r31, 0xFC	; 252
     1520:	11 82       	std	Z+1, r1	; 0x01
- */
-void os_initScheduler(void)
-{
-	// 1.
-	// As the processes are just being initialized, all slots should be unused so far.
-	for (int i = 0; i < MAX_NUMBER_OF_PROCESSES; i++)
     1522:	01 96       	adiw	r24, 0x01	; 1
     1524:	88 30       	cpi	r24, 0x08	; 8
     1526:	91 05       	cpc	r25, r1
@@ -3103,48 +2486,23 @@ void os_initScheduler(void)
     152a:	c0 e0       	ldi	r28, 0x00	; 0
     152c:	d0 e0       	ldi	r29, 0x00	; 0
     152e:	08 c0       	rjmp	.+16     	; 0x1540 <os_initScheduler+0x3c>
-	}
-
-	// Start all registered programs, which a flagged as autostart (i.e. call os_exec on them).
-	for (int i = 0; i < MAX_NUMBER_OF_PROGRAMS; i++)
-	{
-		if (os_checkAutostartProgram(i))
     1530:	8c 2f       	mov	r24, r28
     1532:	32 de       	rcall	.-924    	; 0x1198 <os_checkAutostartProgram>
     1534:	88 23       	and	r24, r24
     1536:	19 f0       	breq	.+6      	; 0x153e <os_initScheduler+0x3a>
-		{
-			os_exec(i, DEFAULT_PRIORITY);
     1538:	62 e0       	ldi	r22, 0x02	; 2
     153a:	8c 2f       	mov	r24, r28
     153c:	3e df       	rcall	.-388    	; 0x13ba <os_exec>
-	{
-		os_processes[i].state = OS_PS_UNUSED;
-	}
-
-	// Start all registered programs, which a flagged as autostart (i.e. call os_exec on them).
-	for (int i = 0; i < MAX_NUMBER_OF_PROGRAMS; i++)
     153e:	21 96       	adiw	r28, 0x01	; 1
     1540:	c0 31       	cpi	r28, 0x10	; 16
     1542:	d1 05       	cpc	r29, r1
     1544:	ac f3       	brlt	.-22     	; 0x1530 <os_initScheduler+0x2c>
-		{
-			os_exec(i, DEFAULT_PRIORITY);
-		}
-
-	}
-	os_resetSchedulingInformation(currSchedStrat);
     1546:	80 91 7b 03 	lds	r24, 0x037B	; 0x80037b <currSchedStrat>
     154a:	f8 d1       	rcall	.+1008   	; 0x193c <os_resetSchedulingInformation>
-
-	delayMs(3000);
     154c:	88 eb       	ldi	r24, 0xB8	; 184
     154e:	9b e0       	ldi	r25, 0x0B	; 11
     1550:	2d dd       	rcall	.-1446   	; 0xfac <delayMs>
     1552:	20 91 b3 03 	lds	r18, 0x03B3	; 0x8003b3 <os_programs>
-
-	// Uncomment:
-	assert(os_programs[0] != NULL, "There is no idle proc");
     1556:	30 91 b4 03 	lds	r19, 0x03B4	; 0x8003b4 <os_programs+0x1>
     155a:	86 ec       	ldi	r24, 0xC6	; 198
     155c:	92 e0       	ldi	r25, 0x02	; 2
@@ -3157,7 +2515,6 @@ void os_initScheduler(void)
     156a:	8f 93       	push	r24
     156c:	4c dd       	rcall	.-1384   	; 0x1006 <assertPstr>
     156e:	0f 90       	pop	r0
-}
     1570:	0f 90       	pop	r0
     1572:	0f 90       	pop	r0
     1574:	df 91       	pop	r29
@@ -3166,12 +2523,6 @@ void os_initScheduler(void)
 
 0000157a <os_isStackInBounds>:
     157a:	8f 92       	push	r8
- *
- *  \param pid The ID of the process for which the stack pointer has to be checked.
- *  \return True if the stack pointer is still in its bounds.
- */
-bool os_isStackInBounds(process_id_t pid)
-{
     157c:	9f 92       	push	r9
     157e:	af 92       	push	r10
     1580:	bf 92       	push	r11
@@ -3181,7 +2532,6 @@ bool os_isStackInBounds(process_id_t pid)
     1588:	ff 92       	push	r15
     158a:	0f 93       	push	r16
     158c:	1f 93       	push	r17
-	if (os_processes[pid].sp.as_int > PROCESS_STACK_BOTTOM(pid) || os_processes[pid].sp.as_int < PROCESS_STACK_BOTTOM(pid) - STACK_SIZE_PROC)
     158e:	48 2f       	mov	r20, r24
     1590:	50 e0       	ldi	r21, 0x00	; 0
     1592:	fa 01       	movw	r30, r20
@@ -3229,16 +2579,11 @@ bool os_isStackInBounds(process_id_t pid)
     15e6:	ea 04       	cpc	r14, r10
     15e8:	fb 04       	cpc	r15, r11
     15ea:	20 f4       	brcc	.+8      	; 0x15f4 <os_isStackInBounds+0x7a>
-	{
-		return false;
     15ec:	80 e0       	ldi	r24, 0x00	; 0
     15ee:	03 c0       	rjmp	.+6      	; 0x15f6 <os_isStackInBounds+0x7c>
     15f0:	80 e0       	ldi	r24, 0x00	; 0
     15f2:	01 c0       	rjmp	.+2      	; 0x15f6 <os_isStackInBounds+0x7c>
-	}
-	return true;
     15f4:	81 e0       	ldi	r24, 0x01	; 1
-}
     15f6:	1f 91       	pop	r17
     15f8:	0f 91       	pop	r16
     15fa:	ff 90       	pop	r15
@@ -3252,12 +2597,6 @@ bool os_isStackInBounds(process_id_t pid)
     160a:	08 95       	ret
 
 0000160c <__vector_13>:
-ISR(TIMER2_COMPA_vect)
-{
-	// 1. Is implicitly done
-
-	// 2. Save runtime-context of recently current process using the well-known macro
-	saveContext();
     160c:	ff 93       	push	r31
     160e:	ff b7       	in	r31, 0x3f	; 63
     1610:	ff 93       	push	r31
@@ -3293,9 +2632,6 @@ ISR(TIMER2_COMPA_vect)
     164c:	1f 92       	push	r1
     164e:	11 24       	eor	r1, r1
     1650:	0f 92       	push	r0
-
-	// 3. Save stack pointer of current process
-	os_processes[currentProc].sp.as_int = SP;
     1652:	80 91 7c 03 	lds	r24, 0x037C	; 0x80037c <currentProc>
     1656:	90 e0       	ldi	r25, 0x00	; 0
     1658:	2d b7       	in	r18, 0x3d	; 61
@@ -3311,16 +2647,10 @@ ISR(TIMER2_COMPA_vect)
     166c:	fc 4f       	sbci	r31, 0xFC	; 252
     166e:	33 83       	std	Z+3, r19	; 0x03
     1670:	22 83       	std	Z+2, r18	; 0x02
-
-	// 4. Set stack pointer onto ISR-Stack
-	SP = BOTTOM_OF_ISR_STACK;
     1672:	8f ed       	ldi	r24, 0xDF	; 223
     1674:	91 e2       	ldi	r25, 0x21	; 33
     1676:	9e bf       	out	0x3e, r25	; 62
     1678:	8d bf       	out	0x3d, r24	; 61
-
-	// 5. Set process state to ready
-	if (os_processes[currentProc].state == OS_PS_RUNNING)
     167a:	10 91 7c 03 	lds	r17, 0x037C	; 0x80037c <currentProc>
     167e:	c1 2f       	mov	r28, r17
     1680:	d0 e0       	ldi	r29, 0x00	; 0
@@ -3336,8 +2666,6 @@ ISR(TIMER2_COMPA_vect)
     1694:	81 81       	ldd	r24, Z+1	; 0x01
     1696:	82 30       	cpi	r24, 0x02	; 2
     1698:	59 f4       	brne	.+22     	; 0x16b0 <__vector_13+0xa4>
-	{
-		os_processes[currentProc].state = OS_PS_READY;
     169a:	fe 01       	movw	r30, r28
     169c:	ee 0f       	add	r30, r30
     169e:	ff 1f       	adc	r31, r31
@@ -3349,11 +2677,6 @@ ISR(TIMER2_COMPA_vect)
     16aa:	fc 4f       	sbci	r31, 0xFC	; 252
     16ac:	81 e0       	ldi	r24, 0x01	; 1
     16ae:	81 83       	std	Z+1, r24	; 0x01
-	}
-	// Note for task 2: Only set to ready if it is currently running because of os_kill
-
-	// In task 2: Save the processes stack checksum
-	os_processes[currentProc].checksum = os_getStackChecksum(currentProc);
     16b0:	81 2f       	mov	r24, r17
     16b2:	38 de       	rcall	.-912    	; 0x1324 <os_getStackChecksum>
     16b4:	9e 01       	movw	r18, r28
@@ -3366,15 +2689,10 @@ ISR(TIMER2_COMPA_vect)
     16c2:	cd 57       	subi	r28, 0x7D	; 125
     16c4:	dc 4f       	sbci	r29, 0xFC	; 252
     16c6:	8d 83       	std	Y+5, r24	; 0x05
-
-	// In task 2: Check if the stack pointer has an invalid value
-	if (!os_isStackInBounds(currentProc))
     16c8:	81 2f       	mov	r24, r17
     16ca:	57 df       	rcall	.-338    	; 0x157a <os_isStackInBounds>
     16cc:	81 11       	cpse	r24, r1
     16ce:	0b c0       	rjmp	.+22     	; 0x16e6 <__vector_13+0xda>
-	{
-		os_error("Stack pointer out of bounds in process %d", currentProc);
     16d0:	1f 92       	push	r1
     16d2:	1f 93       	push	r17
     16d4:	82 e2       	ldi	r24, 0x22	; 34
@@ -3385,11 +2703,6 @@ ISR(TIMER2_COMPA_vect)
     16de:	0f 90       	pop	r0
     16e0:	0f 90       	pop	r0
     16e2:	0f 90       	pop	r0
-	}
-
-	// 6. Find next process using the set scheduling strategy
-
-	switch (os_getSchedulingStrategy())
     16e4:	0f 90       	pop	r0
     16e6:	93 dd       	rcall	.-1242   	; 0x120e <os_getSchedulingStrategy>
     16e8:	88 23       	and	r24, r24
@@ -3397,33 +2710,19 @@ ISR(TIMER2_COMPA_vect)
     16ec:	81 30       	cpi	r24, 0x01	; 1
     16ee:	49 f0       	breq	.+18     	; 0x1702 <__vector_13+0xf6>
     16f0:	10 c0       	rjmp	.+32     	; 0x1712 <__vector_13+0x106>
-	{
-		case OS_SS_ROUND_ROBIN:
-		currentProc = os_scheduler_RoundRobin(os_processes, currentProc);
     16f2:	60 91 7c 03 	lds	r22, 0x037C	; 0x80037c <currentProc>
     16f6:	83 e8       	ldi	r24, 0x83	; 131
     16f8:	93 e0       	ldi	r25, 0x03	; 3
     16fa:	bf d0       	rcall	.+382    	; 0x187a <os_scheduler_RoundRobin>
     16fc:	80 93 7c 03 	sts	0x037C, r24	; 0x80037c <currentProc>
-		break;
-		case OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN:
-		currentProc = os_scheduler_DynamicPriorityRoundRobin(os_processes, currentProc);
     1700:	0a c0       	rjmp	.+20     	; 0x1716 <__vector_13+0x10a>
     1702:	60 91 7c 03 	lds	r22, 0x037C	; 0x80037c <currentProc>
     1706:	83 e8       	ldi	r24, 0x83	; 131
     1708:	93 e0       	ldi	r25, 0x03	; 3
     170a:	41 d1       	rcall	.+642    	; 0x198e <os_scheduler_DynamicPriorityRoundRobin>
     170c:	80 93 7c 03 	sts	0x037C, r24	; 0x80037c <currentProc>
-		break;
     1710:	02 c0       	rjmp	.+4      	; 0x1716 <__vector_13+0x10a>
-		default:
-		currentProc = 0;
     1712:	10 92 7c 03 	sts	0x037C, r1	; 0x80037c <currentProc>
-		break;
-	}
-
-	// In task 2: Check if the checksum changed since the process was interrupted
-	if (os_processes[currentProc].checksum != os_getStackChecksum(currentProc))
     1716:	c0 91 7c 03 	lds	r28, 0x037C	; 0x80037c <currentProc>
     171a:	8c 2f       	mov	r24, r28
     171c:	90 e0       	ldi	r25, 0x00	; 0
@@ -3441,8 +2740,6 @@ ISR(TIMER2_COMPA_vect)
     1734:	f7 dd       	rcall	.-1042   	; 0x1324 <os_getStackChecksum>
     1736:	d8 17       	cp	r29, r24
     1738:	59 f0       	breq	.+22     	; 0x1750 <__vector_13+0x144>
-	{
-		os_error("Checksum mismatch in process %d", currentProc);
     173a:	1f 92       	push	r1
     173c:	cf 93       	push	r28
     173e:	82 e0       	ldi	r24, 0x02	; 2
@@ -3455,10 +2752,6 @@ ISR(TIMER2_COMPA_vect)
     174c:	0f 90       	pop	r0
     174e:	0f 90       	pop	r0
     1750:	80 91 7c 03 	lds	r24, 0x037C	; 0x80037c <currentProc>
-	}
-
-	// 7. Set the state of the now chosen process to running
-	os_processes[currentProc].state = OS_PS_RUNNING;
     1754:	90 e0       	ldi	r25, 0x00	; 0
     1756:	fc 01       	movw	r30, r24
     1758:	ee 0f       	add	r30, r30
@@ -3475,19 +2768,11 @@ ISR(TIMER2_COMPA_vect)
     176e:	2c 93       	st	X, r18
     1770:	11 97       	sbiw	r26, 0x01	; 1
     1772:	fd 01       	movw	r30, r26
-
-	// 8. Set SP to where it was when the resuming process was interrupted
-	SP = os_processes[currentProc].sp.as_ptr;
     1774:	82 81       	ldd	r24, Z+2	; 0x02
     1776:	93 81       	ldd	r25, Z+3	; 0x03
     1778:	9e bf       	out	0x3e, r25	; 62
     177a:	8d bf       	out	0x3d, r24	; 61
     177c:	0f 90       	pop	r0
-
-	// 9. Restore runtime context using the well-known macro.
-	// This will cause the process to continue where it was interrupted.
-	// Any code after the macro won't be executed as it has an reti() instruction at the end.
-	restoreContext();
     177e:	1f 90       	pop	r1
     1780:	2f 90       	pop	r2
     1782:	3f 90       	pop	r3
@@ -3525,36 +2810,15 @@ ISR(TIMER2_COMPA_vect)
 
 000017c2 <os_yield>:
     17c2:	80 91 7a 03 	lds	r24, 0x037A	; 0x80037a <criticalSectionCount>
-/*!
- * Triggers scheduler to schedule another process.
- */
-void os_yield()
-{
-	if (criticalSectionCount != 0)
     17c6:	81 11       	cpse	r24, r1
     17c8:	04 c0       	rjmp	.+8      	; 0x17d2 <os_yield+0x10>
-	{
-		return;
-	}
-	cli();
     17ca:	f8 94       	cli
-	TCNT2 = 0;
     17cc:	10 92 b2 00 	sts	0x00B2, r1	; 0x8000b2 <__TEXT_REGION_LENGTH__+0x7c00b2>
-	TIMER2_COMPA_vect();
     17d0:	1d cf       	rjmp	.-454    	; 0x160c <__vector_13>
     17d2:	08 95       	ret
 
 000017d4 <os_kill>:
- *
- *  \param pid The process id of the process to be killed
- *  \return True, if the killing process was successful
- */
-bool os_kill(process_id_t pid)
-{
     17d4:	cf 93       	push	r28
-	
-	// If the pid is invalid, return false
-	if (pid >= MAX_NUMBER_OF_PROCESSES || pid == 0 || os_processes[pid].state == OS_PS_UNUSED)
     17d6:	9f ef       	ldi	r25, 0xFF	; 255
     17d8:	98 0f       	add	r25, r24
     17da:	97 30       	cpi	r25, 0x07	; 7
@@ -3574,42 +2838,21 @@ bool os_kill(process_id_t pid)
     17f6:	99 23       	and	r25, r25
     17f8:	01 f1       	breq	.+64     	; 0x183a <os_kill+0x66>
     17fa:	c8 2f       	mov	r28, r24
-	{
-		return false;
-	}
-	os_enterCriticalSection();
     17fc:	0b dd       	rcall	.-1514   	; 0x1214 <os_enterCriticalSection>
-
-	os_getProcessSlot(pid)->state = OS_PS_UNUSED;
     17fe:	8c 2f       	mov	r24, r28
     1800:	eb dc       	rcall	.-1578   	; 0x11d8 <os_getProcessSlot>
     1802:	fc 01       	movw	r30, r24
-
-	// Tidy up the scheduler
-	// (Process needs to be removed from ready queue of DPRR)
-
-	os_resetProcessSchedulingInformation(os_getSchedulingStrategy(), pid);
     1804:	11 82       	std	Z+1, r1	; 0x01
     1806:	03 dd       	rcall	.-1530   	; 0x120e <os_getSchedulingStrategy>
     1808:	6c 2f       	mov	r22, r28
-
-	// If the process kills itself, we mustn't return
-	if (os_getCurrentProc() == pid)
     180a:	71 d0       	rcall	.+226    	; 0x18ee <os_resetProcessSchedulingInformation>
     180c:	f6 dc       	rcall	.-1556   	; 0x11fa <os_getCurrentProc>
     180e:	c8 13       	cpse	r28, r24
-	{
-		criticalSectionCount = 1;
     1810:	0e c0       	rjmp	.+28     	; 0x182e <os_kill+0x5a>
     1812:	81 e0       	ldi	r24, 0x01	; 1
-		os_leaveCriticalSection();
     1814:	80 93 7a 03 	sts	0x037A, r24	; 0x80037a <criticalSectionCount>
-		sei();
-		os_yield();
     1818:	1c dd       	rcall	.-1480   	; 0x1252 <os_leaveCriticalSection>
     181a:	78 94       	sei
-		while (1)
-			printf("Penis");
     181c:	d2 df       	rcall	.-92     	; 0x17c2 <os_yield>
     181e:	8c e1       	ldi	r24, 0x1C	; 28
     1820:	92 e0       	ldi	r25, 0x02	; 2
@@ -3617,45 +2860,21 @@ bool os_kill(process_id_t pid)
     1824:	8f 93       	push	r24
     1826:	84 d4       	rcall	.+2312   	; 0x2130 <printf>
     1828:	0f 90       	pop	r0
-	}
-	os_leaveCriticalSection();
     182a:	0f 90       	pop	r0
     182c:	f8 cf       	rjmp	.-16     	; 0x181e <os_kill+0x4a>
-	os_yield();
     182e:	11 dd       	rcall	.-1502   	; 0x1252 <os_leaveCriticalSection>
     1830:	c8 df       	rcall	.-112    	; 0x17c2 <os_yield>
-
-	return true;
     1832:	81 e0       	ldi	r24, 0x01	; 1
     1834:	03 c0       	rjmp	.+6      	; 0x183c <os_kill+0x68>
-{
-	
-	// If the pid is invalid, return false
-	if (pid >= MAX_NUMBER_OF_PROCESSES || pid == 0 || os_processes[pid].state == OS_PS_UNUSED)
-	{
-		return false;
     1836:	80 e0       	ldi	r24, 0x00	; 0
     1838:	01 c0       	rjmp	.+2      	; 0x183c <os_kill+0x68>
     183a:	80 e0       	ldi	r24, 0x00	; 0
-	os_leaveCriticalSection();
-	os_yield();
-
-	return true;
-
-}
     183c:	cf 91       	pop	r28
     183e:	08 95       	ret
 
 00001840 <os_dispatcher>:
- * This wrapper enables the possibility to perform a few necessary steps after the actual process
- * function has finished.
- */
-void os_dispatcher()
-{
-	process_id_t currentProc = os_getCurrentProc();
     1840:	dc dc       	rcall	.-1608   	; 0x11fa <os_getCurrentProc>
     1842:	c8 2f       	mov	r28, r24
-	program_t *function = os_lookupProgramFunction(os_processes[currentProc].progID);
     1844:	90 e0       	ldi	r25, 0x00	; 0
     1846:	fc 01       	movw	r30, r24
     1848:	ee 0f       	add	r30, r30
@@ -3668,24 +2887,13 @@ void os_dispatcher()
     1856:	fc 4f       	sbci	r31, 0xFC	; 252
     1858:	80 81       	ld	r24, Z
     185a:	b0 dc       	rcall	.-1696   	; 0x11bc <os_lookupProgramFunction>
-	
-	if (function != NULL)
     185c:	00 97       	sbiw	r24, 0x00	; 0
     185e:	11 f0       	breq	.+4      	; 0x1864 <os_dispatcher+0x24>
-	function();
     1860:	fc 01       	movw	r30, r24
-
-
-	os_kill(currentProc);
     1862:	19 95       	eicall
     1864:	8c 2f       	mov	r24, r28
-
-
-	os_yield();
     1866:	b6 df       	rcall	.-148    	; 0x17d4 <os_kill>
     1868:	ac df       	rcall	.-168    	; 0x17c2 <os_yield>
-	while (1)
-		printf("Penis");
     186a:	8c e1       	ldi	r24, 0x1C	; 28
     186c:	92 e0       	ldi	r25, 0x02	; 2
     186e:	9f 93       	push	r25
@@ -3696,30 +2904,13 @@ void os_dispatcher()
     1878:	f8 cf       	rjmp	.-16     	; 0x186a <os_dispatcher+0x2a>
 
 0000187a <os_scheduler_RoundRobin>:
- *  \param processes An array holding the processes to choose the next process from.
- *  \param current The id of the current process.
- *  \return The next process to be executed determined on the basis of the even strategy.
- */
-process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t current)
-{
     187a:	cf 93       	push	r28
     187c:	df 93       	push	r29
     187e:	ec 01       	movw	r28, r24
-
-	// Look for the next proc that is ready, there has to be at least one, this has been checked before. Don't choose 0 as it is the idle process
-
-	// Return resulting process id
-	
-	process_id_t currentProc = os_getCurrentProc();
     1880:	bc dc       	rcall	.-1672   	; 0x11fa <os_getCurrentProc>
-
-	// Look for the next proc that is ready, there has to be at least one, this has been checked before. Don't choose 0 as it is the idle process
-	for (uint8_t i = currentProc + 1; i < MAX_NUMBER_OF_PROCESSES; i++)
     1882:	91 e0       	ldi	r25, 0x01	; 1
     1884:	98 0f       	add	r25, r24
     1886:	0f c0       	rjmp	.+30     	; 0x18a6 <os_scheduler_RoundRobin+0x2c>
-	{
-		if (processes[i].state == OS_PS_READY)
     1888:	29 2f       	mov	r18, r25
     188a:	30 e0       	ldi	r19, 0x00	; 0
     188c:	f9 01       	movw	r30, r18
@@ -3734,23 +2925,11 @@ process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t c
     189e:	21 81       	ldd	r18, Z+1	; 0x01
     18a0:	21 30       	cpi	r18, 0x01	; 1
     18a2:	f9 f0       	breq	.+62     	; 0x18e2 <os_scheduler_RoundRobin+0x68>
-	// Return resulting process id
-	
-	process_id_t currentProc = os_getCurrentProc();
-
-	// Look for the next proc that is ready, there has to be at least one, this has been checked before. Don't choose 0 as it is the idle process
-	for (uint8_t i = currentProc + 1; i < MAX_NUMBER_OF_PROCESSES; i++)
     18a4:	9f 5f       	subi	r25, 0xFF	; 255
     18a6:	98 30       	cpi	r25, 0x08	; 8
     18a8:	78 f3       	brcs	.-34     	; 0x1888 <os_scheduler_RoundRobin+0xe>
     18aa:	91 e0       	ldi	r25, 0x01	; 1
     18ac:	0f c0       	rjmp	.+30     	; 0x18cc <os_scheduler_RoundRobin+0x52>
-			return i; // Return resulting process id
-		}
-	}
-	for (uint8_t i = 1; i < currentProc + 1; i++)
-	{
-		if (processes[i].state == OS_PS_READY)
     18ae:	29 2f       	mov	r18, r25
     18b0:	30 e0       	ldi	r19, 0x00	; 0
     18b2:	f9 01       	movw	r30, r18
@@ -3765,12 +2944,6 @@ process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t c
     18c4:	21 81       	ldd	r18, Z+1	; 0x01
     18c6:	21 30       	cpi	r18, 0x01	; 1
     18c8:	71 f0       	breq	.+28     	; 0x18e6 <os_scheduler_RoundRobin+0x6c>
-		if (processes[i].state == OS_PS_READY)
-		{
-			return i; // Return resulting process id
-		}
-	}
-	for (uint8_t i = 1; i < currentProc + 1; i++)
     18ca:	9f 5f       	subi	r25, 0xFF	; 255
     18cc:	49 2f       	mov	r20, r25
     18ce:	50 e0       	ldi	r21, 0x00	; 0
@@ -3781,61 +2954,23 @@ process_id_t os_scheduler_RoundRobin(process_t const processes[], process_id_t c
     18d8:	42 17       	cp	r20, r18
     18da:	53 07       	cpc	r21, r19
     18dc:	44 f3       	brlt	.-48     	; 0x18ae <os_scheduler_RoundRobin+0x34>
-			return i; // Return resulting process id
-		}
-	}
-
-	// If no process except idle process ready, choose idle process
-	return 0; // Return resulting process id
     18de:	80 e0       	ldi	r24, 0x00	; 0
     18e0:	03 c0       	rjmp	.+6      	; 0x18e8 <os_scheduler_RoundRobin+0x6e>
-	// Look for the next proc that is ready, there has to be at least one, this has been checked before. Don't choose 0 as it is the idle process
-	for (uint8_t i = currentProc + 1; i < MAX_NUMBER_OF_PROCESSES; i++)
-	{
-		if (processes[i].state == OS_PS_READY)
-		{
-			return i; // Return resulting process id
     18e2:	89 2f       	mov	r24, r25
     18e4:	01 c0       	rjmp	.+2      	; 0x18e8 <os_scheduler_RoundRobin+0x6e>
-	}
-	for (uint8_t i = 1; i < currentProc + 1; i++)
-	{
-		if (processes[i].state == OS_PS_READY)
-		{
-			return i; // Return resulting process id
     18e6:	89 2f       	mov	r24, r25
-	}
-
-	// If no process except idle process ready, choose idle process
-	return 0; // Return resulting process id
-
-}
     18e8:	df 91       	pop	r29
     18ea:	cf 91       	pop	r28
     18ec:	08 95       	ret
 
 000018ee <os_resetProcessSchedulingInformation>:
- *
- * \param strategy The scheduling strategy currently in use
- * \param id  The process slot to erase state for
- */
-void os_resetProcessSchedulingInformation(scheduling_strategy_t strategy, process_id_t id)
-{
     18ee:	cf 93       	push	r28
     18f0:	df 93       	push	r29
-	
-	if (strategy == OS_SS_ROUND_ROBIN)
     18f2:	88 23       	and	r24, r24
     18f4:	01 f1       	breq	.+64     	; 0x1936 <os_resetProcessSchedulingInformation+0x48>
     18f6:	d6 2f       	mov	r29, r22
     18f8:	c0 e0       	ldi	r28, 0x00	; 0
     18fa:	09 c0       	rjmp	.+18     	; 0x190e <os_resetProcessSchedulingInformation+0x20>
-		return;
-	}
-
-	for (uint8_t i = OS_PRIO_HIGH; i <= OS_PRIO_LOW; i++)
-	{
-		rq_remove(&(schedulingInfo.queues_ready[i]), id);
     18fc:	2b e0       	ldi	r18, 0x0B	; 11
     18fe:	c2 9f       	mul	r28, r18
     1900:	c0 01       	movw	r24, r0
@@ -3844,26 +2979,15 @@ void os_resetProcessSchedulingInformation(scheduling_strategy_t strategy, proces
     1906:	8b 52       	subi	r24, 0x2B	; 43
     1908:	9c 4f       	sbci	r25, 0xFC	; 252
     190a:	59 d8       	rcall	.-3918   	; 0x9be <rq_remove>
-	if (strategy == OS_SS_ROUND_ROBIN)
-	{
-		return;
-	}
-
-	for (uint8_t i = OS_PRIO_HIGH; i <= OS_PRIO_LOW; i++)
     190c:	cf 5f       	subi	r28, 0xFF	; 255
     190e:	c3 30       	cpi	r28, 0x03	; 3
     1910:	a8 f3       	brcs	.-22     	; 0x18fc <os_resetProcessSchedulingInformation+0xe>
-	{
-		rq_remove(&(schedulingInfo.queues_ready[i]), id);
-	}
-	if (os_getProcessSlot(id)->state == OS_PS_READY)
     1912:	8d 2f       	mov	r24, r29
     1914:	61 dc       	rcall	.-1854   	; 0x11d8 <os_getProcessSlot>
     1916:	fc 01       	movw	r30, r24
     1918:	81 81       	ldd	r24, Z+1	; 0x01
     191a:	81 30       	cpi	r24, 0x01	; 1
     191c:	61 f4       	brne	.+24     	; 0x1936 <os_resetProcessSchedulingInformation+0x48>
-	rq_push(&(schedulingInfo.queues_ready[os_getProcessSlot(id)->priority]), id);
     191e:	8d 2f       	mov	r24, r29
     1920:	5b dc       	rcall	.-1866   	; 0x11d8 <os_getProcessSlot>
     1922:	fc 01       	movw	r30, r24
@@ -3876,30 +3000,16 @@ void os_resetProcessSchedulingInformation(scheduling_strategy_t strategy, proces
     1930:	8b 52       	subi	r24, 0x2B	; 43
     1932:	9c 4f       	sbci	r25, 0xFC	; 252
     1934:	1f d8       	rcall	.-4034   	; 0x974 <rq_push>
-}
     1936:	df 91       	pop	r29
     1938:	cf 91       	pop	r28
     193a:	08 95       	ret
 
 0000193c <os_resetSchedulingInformation>:
- *  and is done when the strategy is changed through os_setSchedulingStrategy
- *
- * \param strategy  The strategy to reset information for
- */
-void os_resetSchedulingInformation(scheduling_strategy_t strategy)
-{
     193c:	cf 93       	push	r28
-	 if (strategy == OS_SS_ROUND_ROBIN)
     193e:	88 23       	and	r24, r24
     1940:	21 f1       	breq	.+72     	; 0x198a <os_resetSchedulingInformation+0x4e>
     1942:	c0 e0       	ldi	r28, 0x00	; 0
     1944:	08 c0       	rjmp	.+16     	; 0x1956 <os_resetSchedulingInformation+0x1a>
-	 else
-	 //terminal_log_printf_p(PSTR("os_resetSchedulingInformation() -> "), PSTR("Resetting scheduling information\n"));
-
-	 for (uint8_t i = 0; i <= OS_PRIO_LOW; i++)
-	 {
-		 rq_clear(&schedulingInfo.queues_ready[i]);
     1946:	2b e0       	ldi	r18, 0x0B	; 11
     1948:	c2 9f       	mul	r28, r18
     194a:	c0 01       	movw	r24, r0
@@ -3907,31 +3017,17 @@ void os_resetSchedulingInformation(scheduling_strategy_t strategy)
     194e:	8b 52       	subi	r24, 0x2B	; 43
     1950:	9c 4f       	sbci	r25, 0xFC	; 252
     1952:	31 d8       	rcall	.-3998   	; 0x9b6 <rq_clear>
-		return;
-	 }
-	 else
-	 //terminal_log_printf_p(PSTR("os_resetSchedulingInformation() -> "), PSTR("Resetting scheduling information\n"));
-
-	 for (uint8_t i = 0; i <= OS_PRIO_LOW; i++)
     1954:	cf 5f       	subi	r28, 0xFF	; 255
     1956:	c3 30       	cpi	r28, 0x03	; 3
     1958:	b0 f3       	brcs	.-20     	; 0x1946 <os_resetSchedulingInformation+0xa>
     195a:	c1 e0       	ldi	r28, 0x01	; 1
     195c:	14 c0       	rjmp	.+40     	; 0x1986 <os_resetSchedulingInformation+0x4a>
-		 rq_clear(&schedulingInfo.queues_ready[i]);
-	 }
-
-	 for (process_id_t pid = 1; pid < MAX_NUMBER_OF_PROCESSES; pid++)
-	 {
-		 if (os_getProcessSlot(pid)->state == OS_PS_READY)
     195e:	8c 2f       	mov	r24, r28
     1960:	3b dc       	rcall	.-1930   	; 0x11d8 <os_getProcessSlot>
     1962:	fc 01       	movw	r30, r24
     1964:	81 81       	ldd	r24, Z+1	; 0x01
     1966:	81 30       	cpi	r24, 0x01	; 1
     1968:	69 f4       	brne	.+26     	; 0x1984 <os_resetSchedulingInformation+0x48>
-		 {
-			 rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(pid)->priority], pid);
     196a:	8c 2f       	mov	r24, r28
     196c:	35 dc       	rcall	.-1942   	; 0x11d8 <os_getProcessSlot>
     196e:	fc 01       	movw	r30, r24
@@ -3944,31 +3040,13 @@ void os_resetSchedulingInformation(scheduling_strategy_t strategy)
     197c:	8b 52       	subi	r24, 0x2B	; 43
     197e:	9c 4f       	sbci	r25, 0xFC	; 252
     1980:	0e 94 ba 04 	call	0x974	; 0x974 <rq_push>
-	 for (uint8_t i = 0; i <= OS_PRIO_LOW; i++)
-	 {
-		 rq_clear(&schedulingInfo.queues_ready[i]);
-	 }
-
-	 for (process_id_t pid = 1; pid < MAX_NUMBER_OF_PROCESSES; pid++)
     1984:	cf 5f       	subi	r28, 0xFF	; 255
     1986:	c8 30       	cpi	r28, 0x08	; 8
     1988:	50 f3       	brcs	.-44     	; 0x195e <os_resetSchedulingInformation+0x22>
-		 if (os_getProcessSlot(pid)->state == OS_PS_READY)
-		 {
-			 rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(pid)->priority], pid);
-		 }
-	 }
-}
     198a:	cf 91       	pop	r28
     198c:	08 95       	ret
 
 0000198e <os_scheduler_DynamicPriorityRoundRobin>:
- *  \param processes An array holding the processes to choose the next process from.
- *  \param current The id of the current process.
- *  \return The next process to be executed determined on the basis of the dynamic priority round-robin strategy.
- */
-process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[], process_id_t current)
-{
     198e:	df 92       	push	r13
     1990:	ef 92       	push	r14
     1992:	ff 92       	push	r15
@@ -3977,18 +3055,9 @@ process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[],
     1998:	cf 93       	push	r28
     199a:	df 93       	push	r29
     199c:	d6 2e       	mov	r13, r22
-
-	// 3. Get next process from ready queue
-	
-
-	// 1. Move processes one higher in priority
-	for (int i = 0; i < PRIORITY_COUNT - 1; i++)
     199e:	c0 e0       	ldi	r28, 0x00	; 0
     19a0:	d0 e0       	ldi	r29, 0x00	; 0
     19a2:	21 c0       	rjmp	.+66     	; 0x19e6 <os_scheduler_DynamicPriorityRoundRobin+0x58>
-	{
-
-		if (!rq_isEmpty(&schedulingInfo.queues_ready[i + 1]))
     19a4:	7e 01       	movw	r14, r28
     19a6:	2f ef       	ldi	r18, 0xFF	; 255
     19a8:	e2 1a       	sub	r14, r18
@@ -4005,12 +3074,8 @@ process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[],
     19be:	0e 94 80 04 	call	0x900	; 0x900 <rq_isEmpty>
     19c2:	81 11       	cpse	r24, r1
     19c4:	0f c0       	rjmp	.+30     	; 0x19e4 <os_scheduler_DynamicPriorityRoundRobin+0x56>
-		{
-			process_id_t pid = rq_pop(&schedulingInfo.queues_ready[i + 1]);
     19c6:	c8 01       	movw	r24, r16
     19c8:	0e 94 87 04 	call	0x90e	; 0x90e <rq_pop>
-
-			rq_push(&schedulingInfo.queues_ready[i], pid);
     19cc:	9b e0       	ldi	r25, 0x0B	; 11
     19ce:	9c 9f       	mul	r25, r28
     19d0:	90 01       	movw	r18, r0
@@ -4022,36 +3087,16 @@ process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[],
     19dc:	8b 52       	subi	r24, 0x2B	; 43
     19de:	9c 4f       	sbci	r25, 0xFC	; 252
     19e0:	0e 94 ba 04 	call	0x974	; 0x974 <rq_push>
- *  \param processes An array holding the processes to choose the next process from.
- *  \param current The id of the current process.
- *  \return The next process to be executed determined on the basis of the dynamic priority round-robin strategy.
- */
-process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[], process_id_t current)
-{
     19e4:	e7 01       	movw	r28, r14
-
-	// 3. Get next process from ready queue
-	
-
-	// 1. Move processes one higher in priority
-	for (int i = 0; i < PRIORITY_COUNT - 1; i++)
     19e6:	c2 30       	cpi	r28, 0x02	; 2
     19e8:	d1 05       	cpc	r29, r1
     19ea:	e4 f2       	brlt	.-72     	; 0x19a4 <os_scheduler_DynamicPriorityRoundRobin+0x16>
-		else
-		{		}
-	}
-
-	// 2. Push current process to the ready queue
-	if (os_getProcessSlot(current)->state == OS_PS_READY)
     19ec:	8d 2d       	mov	r24, r13
     19ee:	f4 db       	rcall	.-2072   	; 0x11d8 <os_getProcessSlot>
     19f0:	fc 01       	movw	r30, r24
     19f2:	81 81       	ldd	r24, Z+1	; 0x01
     19f4:	81 30       	cpi	r24, 0x01	; 1
     19f6:	69 f4       	brne	.+26     	; 0x1a12 <os_scheduler_DynamicPriorityRoundRobin+0x84>
-	{
-		rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(current)->priority], current);
     19f8:	8d 2d       	mov	r24, r13
     19fa:	ee db       	rcall	.-2084   	; 0x11d8 <os_getProcessSlot>
     19fc:	fc 01       	movw	r30, r24
@@ -4064,21 +3109,9 @@ process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[],
     1a0a:	8b 52       	subi	r24, 0x2B	; 43
     1a0c:	9c 4f       	sbci	r25, 0xFC	; 252
     1a0e:	0e 94 ba 04 	call	0x974	; 0x974 <rq_push>
-
-	// 3. Get next process from ready queue
-	
-
-	// 1. Move processes one higher in priority
-	for (int i = 0; i < PRIORITY_COUNT - 1; i++)
     1a12:	c0 e0       	ldi	r28, 0x00	; 0
     1a14:	d0 e0       	ldi	r29, 0x00	; 0
     1a16:	12 c0       	rjmp	.+36     	; 0x1a3c <os_scheduler_DynamicPriorityRoundRobin+0xae>
-	}
-	
-	// 3. Get next process from ready queue
-	for (int i = 0; i < PRIORITY_COUNT - 1; i++)
-	{
-		if (!rq_isEmpty(&schedulingInfo.queues_ready[i]))
     1a18:	8b e0       	ldi	r24, 0x0B	; 11
     1a1a:	8c 9f       	mul	r24, r28
     1a1c:	80 01       	movw	r16, r0
@@ -4091,32 +3124,14 @@ process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[],
     1a2a:	0e 94 80 04 	call	0x900	; 0x900 <rq_isEmpty>
     1a2e:	81 11       	cpse	r24, r1
     1a30:	04 c0       	rjmp	.+8      	; 0x1a3a <os_scheduler_DynamicPriorityRoundRobin+0xac>
-		{
-
-			process_id_t next_pid = rq_pop(&schedulingInfo.queues_ready[i]);
     1a32:	c8 01       	movw	r24, r16
     1a34:	0e 94 87 04 	call	0x90e	; 0x90e <rq_pop>
-			return next_pid;
     1a38:	05 c0       	rjmp	.+10     	; 0x1a44 <os_scheduler_DynamicPriorityRoundRobin+0xb6>
-	{
-		rq_push(&schedulingInfo.queues_ready[os_getProcessSlot(current)->priority], current);
-	}
-	
-	// 3. Get next process from ready queue
-	for (int i = 0; i < PRIORITY_COUNT - 1; i++)
     1a3a:	21 96       	adiw	r28, 0x01	; 1
     1a3c:	c2 30       	cpi	r28, 0x02	; 2
     1a3e:	d1 05       	cpc	r29, r1
     1a40:	5c f3       	brlt	.-42     	; 0x1a18 <os_scheduler_DynamicPriorityRoundRobin+0x8a>
-		}
-
-	}
-
-	// If no process is ready, return idle process (0)
-	return 0;
     1a42:	80 e0       	ldi	r24, 0x00	; 0
-
-}
     1a44:	df 91       	pop	r29
     1a46:	cf 91       	pop	r28
     1a48:	1f 91       	pop	r17
@@ -4127,12 +3142,6 @@ process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[],
     1a52:	08 95       	ret
 
 00001a54 <strategyImplemented>:
-PROGRAM(6, DONTSTART)
-{
-    testProgram(6);
-}
-
-PROGRAM(7, DONTSTART)
     1a54:	ff 92       	push	r15
     1a56:	0f 93       	push	r16
     1a58:	1f 93       	push	r17
