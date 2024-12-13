@@ -89,11 +89,6 @@ void serialAdapter_init(void)
  */
 void serialAdapter_writeFrame(address_t destAddr, inner_frame_length_t length, inner_frame_t *innerFrame)
 {
-<<<<<<< HEAD
-=======
-	#warning [Praktikum 3] Implement here
-
->>>>>>> 5d3ed7f1d053e9955b9af3e17f1af7ffb171663f
 	// Prepare header
 
 	// Write header and calculate its checksum
@@ -113,8 +108,6 @@ void serialAdapter_writeFrame(address_t destAddr, inner_frame_length_t length, i
  */
 bool serialAdapter_waitForData(uint8_t byteCount, time_t frameTimestamp)
 {
-	#warning [Praktikum 3] Implement here
-<<<<<<< HEAD
 
 	while (xbee_getNumberOfBytesReceived() != byteCount)
 	{
@@ -122,9 +115,6 @@ bool serialAdapter_waitForData(uint8_t byteCount, time_t frameTimestamp)
 			os_yield();
 		else
 	}
-	
-=======
->>>>>>> 5d3ed7f1d053e9955b9af3e17f1af7ffb171663f
 	
 }
 
@@ -182,9 +172,5 @@ void serialAdapter_calculateChecksum(checksum_t *checksum, void *data, uint8_t l
 void serialAdapter_calculateFrameChecksum(checksum_t *checksum, frame_t *frame)
 {
 	serialAdapter_calculateChecksum(checksum,&frame->header,sizeof(frame_header_t));
-<<<<<<< HEAD
 	serialAdapter_calculateChecksum(checksum,&frame->innerFrame,frame->header.length);
-=======
-	serialAdapter_calculateChecksum(checksum,&frame->innerFrame,sizeof(inner_frame_t));
->>>>>>> 5d3ed7f1d053e9955b9af3e17f1af7ffb171663f
 }
