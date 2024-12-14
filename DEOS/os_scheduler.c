@@ -392,7 +392,7 @@ ISR(TIMER2_COMPA_vect)
 	os_processes[currentProc].state = OS_PS_RUNNING;
 
 	// 8. Set SP to where it was when the resuming process was interrupted
-	SP = os_processes[currentProc].sp.as_ptr;
+	SP = os_processes[currentProc].sp.as_int;
 
 	// 9. Restore runtime context using the well-known macro.
 	// This will cause the process to continue where it was interrupted.
@@ -409,7 +409,6 @@ ISR(TIMER2_COMPA_vect)
  */
 PROGRAM(0, AUTOSTART)
 {
-	#warning [Praktikum 1] Implement here
 	 while (true)
 	 {
 		 for (int i = 0; i < 3; i++)
@@ -545,8 +544,6 @@ void os_initScheduler(void)
  */
 void os_startScheduler(void)
 {
-	#warning [Praktikum 1] Implement here
-	
 	 // Set currentProc to idle process
 	 currentProc = 0;
 
@@ -580,8 +577,8 @@ stack_checksum_t os_getStackChecksum(process_id_t pid)
 	
 	
 	stack_checksum_t checksum = 0;
-	uint8_t *stack_bottom = (uint8_t *)PROCESS_STACK_BOTTOM(pid);
-	uint8_t *stack_top = (uint8_t *)(os_processes[pid].sp.as_int);
+	uint8_t *stack_bottom = (uint8_t *)(uintptr_t)PROCESS_STACK_BOTTOM(pid);
+	uint8_t *stack_top = (uint8_t *)(uintptr_t)(os_processes[pid].sp.as_int);
 	uint8_t stack_size = stack_bottom - stack_top;
 
 	if (stack_size >= 16)

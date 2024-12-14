@@ -10,6 +10,8 @@
 #include "../lib/uart.h"
 #include "../os_scheduler.h"
 #include "rfAdapter.h"
+#include <string.h>
+
 
 #include <avr/interrupt.h>
 
@@ -124,22 +126,19 @@ uint16_t xbee_getNumberOfBytesReceived()
  */
 uint8_t xbee_readBuffer(uint8_t *buffer, uint8_t length)
 {
-	if(xbee_getNumberOfBytesReceived() < length)
-		return XBEE_DATA_MISSING;
-	
+	if (xbee_getNumberOfBytesReceived() < length)
+	return XBEE_DATA_MISSING;
+
 	uint8_t temp_buff[length];
-	for(uint8_t i = 0; i<length;i++)
-	{
-		uint8_t err = xbee_read(&temp_buff[i]);
-		if(err != XBEE_SUCCESS)
-			return err;
-	}
-	*buffer = temp_buff;
 	
+	for (uint8_t i = 0; i < length; i++) {
+		uint8_t err = xbee_read(&temp_buff[i]);
+		if (err != XBEE_SUCCESS)
+		return err; // Early return if an error occurs
+	}
+
+	// Copy received data into destination buffer
+	memcpy(buffer, temp_buff, length);
+
 	return XBEE_SUCCESS;
-
-	// Early return if not enough bytes are available
-
-	// Copy received data into destination buffer, check for errors, early return if an error occurs
-
 }

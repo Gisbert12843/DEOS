@@ -155,8 +155,6 @@ void os_resetSchedulingInformation(scheduling_strategy_t strategy)
  */
 process_id_t os_scheduler_DynamicPriorityRoundRobin(process_t const processes[], process_id_t current)
 {
-	#warning [Praktikum 2] Implement here
-
 	// 1. Move processes one higher in priority
 
 	// 2. Push current process to the ready queue
