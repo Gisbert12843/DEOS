@@ -9,6 +9,8 @@
 #include "rfAdapter.h"
 #include "../lib/lcd.h"
 #include "../os_core.h"
+#include "string.h"
+#include "rfAdapter.h"
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -25,7 +27,7 @@ bool rfAdapter_initialized = false;
 start_flag_t serialAdapter_startFlag = 0x5246; // "RF"
 
 //! Configuration what address this microcontroller has
-address_t serialAdapter_address = ADDRESS(1, 0);
+address_t serialAdapter_address = ADDRESS(1, 4);
 
 //----------------------------------------------------------------------------
 // Forward declarations
@@ -46,7 +48,8 @@ void rfAdapter_receiveLcdClear();
  */
 void rfAdapter_init()
 {
-	#warning [Praktikum 3] Implement here
+	DDRB |= (1 << PB7);
+	rfAdapter_initialized = true;
 }
 
 /*!
@@ -56,7 +59,7 @@ void rfAdapter_init()
  */
 uint8_t rfAdapter_isInitialized()
 {
-	#warning [Praktikum 3] Implement here
+	return rfAdapter_initialized;
 }
 
 /*!
@@ -64,7 +67,7 @@ uint8_t rfAdapter_isInitialized()
  */
 void rfAdapter_worker()
 {
-	#warning [Praktikum 3] Implement here
+	serialAdapter_worker();
 }
 
 /*!
@@ -74,8 +77,66 @@ void rfAdapter_worker()
  */
 void serialAdapter_processFrame(frame_t *frame)
 {
-	#warning [Praktikum 3] Implement here
+	if(frame->header.length > COMM_MAX_PAYLOAD_LENGTH + sizeof(uint8_t) || frame->header.length < sizeof(command_t))
+		return;
+		
+	switch(frame->innerFrame.command)
+	{
+		case CMD_SET_LED:
+		{
+			if(frame->header.length-sizeof(command_t) != sizeof(cmd_setLed_t))
+				return;
+			else
+				rfAdapter_receiveSetLed((cmd_setLed_t*)&(frame->innerFrame.payload));				
+		}
+		break;
+		case CMD_TOGGLE_LED:
+		{
+			if(frame->header.length-sizeof(command_t) != 0)
+				return;
+			else
+				rfAdapter_receiveToggleLed();
+		}
+		break;
+		
+		case CMD_LCD_CLEAR:
+		{
+			if(frame->header.length-sizeof(command_t) != 0)
+				return;
+			else
+				rfAdapter_receiveLcdClear();
+		}
+		break;
+		
+		case CMD_LCD_GOTO:
+		{
+			if(frame->header.length-sizeof(command_t) != sizeof(cmd_lcdGoto_t))
+				return;
+			else
+				rfAdapter_receiveLcdGoto((cmd_lcdGoto_t*)&(frame->innerFrame.payload));
+		}
+		break;
+		
+		case CMD_LCD_PRINT:
+		{
+			if(frame->header.length-sizeof(command_t) != sizeof(cmd_lcdPrint_t))
+				return;
+			else
+				rfAdapter_receiveLcdPrint((cmd_lcdPrint_t*)&(frame->innerFrame.payload));
+		}
+		break;
+
+		case CMD_SENSOR_DATA:
+		{
+			#warning TODO!!!
+		}
+		break;
+		
+		default: return;
+	}
 }
+
+
 
 /*!
  *  Handler that's called when command CMD_SET_LED was received
@@ -84,7 +145,14 @@ void serialAdapter_processFrame(frame_t *frame)
  */
 void rfAdapter_receiveSetLed(cmd_setLed_t *data)
 {
-	#warning [Praktikum 3] Implement here
+	if ((bool)data->enable)
+	{
+		PORTB |= (1 << PB7); //on
+	}
+	else
+	{
+		PORTB &= ~(1 << PB7); //off
+	}
 }
 
 /*!
@@ -92,7 +160,7 @@ void rfAdapter_receiveSetLed(cmd_setLed_t *data)
  */
 void rfAdapter_receiveToggleLed()
 {
-	#warning [Praktikum 3] Implement here
+	PORTB ^= (1 << PB7);
 }
 
 /*!
@@ -100,7 +168,7 @@ void rfAdapter_receiveToggleLed()
  */
 void rfAdapter_receiveLcdClear()
 {
-	#warning [Praktikum 3] Implement here
+	PORTB &= ~(1 << PB7);
 }
 
 /*!
@@ -110,7 +178,7 @@ void rfAdapter_receiveLcdClear()
  */
 void rfAdapter_receiveLcdGoto(cmd_lcdGoto_t *data)
 {
-	#warning [Praktikum 3] Implement here
+	lcd_goto(data->x,data->y);
 }
 
 /*!
@@ -120,7 +188,13 @@ void rfAdapter_receiveLcdGoto(cmd_lcdGoto_t *data)
  */
 void rfAdapter_receiveLcdPrint(cmd_lcdPrint_t *data)
 {
-	#warning [Praktikum 3] Implement here
+	char buffer[33];
+	if(data->length >32)
+		return;
+	memcpy(&buffer,&(data->message),data->length);
+	buffer[data->length] = '\0';
+	lcd_writeString(&buffer[0]);
+		
 }
 
 /*!
@@ -131,7 +205,7 @@ void rfAdapter_receiveLcdPrint(cmd_lcdPrint_t *data)
  */
 void rfAdapter_sendSetLed(address_t destAddr, bool enable)
 {
-	#warning [Praktikum 3] Implement here
+	
 }
 
 /*!

@@ -131,82 +131,67 @@ bool serialAdapter_waitForData(uint8_t byteCount, time_t frameTimestamp)
  */
 void serialAdapter_worker()
 {
-	
 	if(!serialAdapter_waitForData(2,getSystemTime_ms()))
 		return;
 	
+	
+	// Parse header one by one, abort if first byte is not part of the start flag
 	uint8_t flag_buffer[2];
 	if(xbee_readBuffer( &flag_buffer[0],1) != XBEE_SUCCESS || flag_buffer[0] != (serialAdapter_startFlag & 0xFF))
 		return;
 	if(xbee_readBuffer(&flag_buffer[1],1) != XBEE_SUCCESS || flag_buffer[1] != ((serialAdapter_startFlag >> 8 ) & 0xFF))
 		return;
 		
-	if ( !serialAdapter_waitForData(sizeof(frame_header_t)-2*sizeof(uint8_t) , getSystemTime_ms() ) )
-		return;
 		
-	frame_header_t received_frame_header;
-	received_frame_header.startFlag = serialAdapter_startFlag;
-	
-	if (xbee_readBuffer((uint8_t*)&received_frame_header.srcAddr, sizeof(received_frame_header.srcAddr)) != XBEE_SUCCESS)
-		return;
-
-		
-	if(xbee_readBuffer((uint8_t*)&received_frame_header.destAddr,sizeof(received_frame_header.destAddr)) != XBEE_SUCCESS)
-		return;
-		
-	if(xbee_readBuffer((uint8_t*)&received_frame_header.length,sizeof(received_frame_header.length)) != XBEE_SUCCESS)
-		return;
-	
-	if(received_frame_header.length > COMM_MAX_INNER_FRAME_LENGTH)
-		return;
-		
-		
-	if(!serialAdapter_waitForData(received_frame_header.length,getSystemTime_ms()))
-		return;
-	inner_frame_t received_innerframe;
-	if(xbee_readBuffer((uint8_t*)&received_innerframe,received_frame_header.length) != XBEE_SUCCESS)
-		return;
-	
-	
-	if(!serialAdapter_waitForData( sizeof(frame_footer_t) ,getSystemTime_ms() ))
-		return;
-	frame_footer_t received_frame_footer;
-	if(xbee_readBuffer((uint8_t*)&received_frame_footer,sizeof(frame_footer_t)) != XBEE_SUCCESS)
+	// Wait for arrival of complete header
+	if (!serialAdapter_waitForData(sizeof(frame_header_t)-(2 * sizeof(uint8_t)) , getSystemTime_ms() ) )
 		return;
 		
 	frame_t received_frame;
-	received_frame.header = received_frame_header;
-	received_frame.innerFrame = received_innerframe;
-	received_frame.footer = received_frame_footer;
+		
+	received_frame.header.startFlag = serialAdapter_startFlag;
 	
+	if (xbee_readBuffer((uint8_t*)&received_frame.header.srcAddr, sizeof(received_frame.header.srcAddr)) != XBEE_SUCCESS)
+		return;
+
+		
+	if(xbee_readBuffer((uint8_t*)&received_frame.header.destAddr,sizeof(received_frame.header.destAddr)) != XBEE_SUCCESS)
+		return;
+		
+	if(xbee_readBuffer((uint8_t*)&received_frame.header.length,sizeof(received_frame.header.length)) != XBEE_SUCCESS)
+		return;
+	
+	if(received_frame.header.length > COMM_MAX_INNER_FRAME_LENGTH)
+		return;
+		
+	// Wait for complete inner frame and footer
+	if(!serialAdapter_waitForData(received_frame.header.length + sizeof(frame_footer_t),getSystemTime_ms()))
+		return;
+		
+		
+	// Read inner frame
+	if(xbee_readBuffer((uint8_t*)&received_frame.innerFrame,received_frame.header.length) != XBEE_SUCCESS)
+		return;
+	
+	// Read footer
+	if(xbee_readBuffer((uint8_t*)&received_frame.footer,sizeof(frame_footer_t)) != XBEE_SUCCESS)
+		return;
+	
+	// Read checksum
 	checksum_t frame_checksum;
 	serialAdapter_calculateFrameChecksum(&frame_checksum,&received_frame);
-	if(frame_checksum != received_frame_footer.checksum)
-		return;
 	
-	if(received_frame_header.destAddr != ADDRESS_BROADCAST && received_frame_header.destAddr != serialAdapter_address)
-		return;
-	
-	serialAdapter_processFrame(&received_frame);
-	
-	
-
-	// Wait for arrival of complete header
- 
-	// Parse header one by one, abort if first byte is not part of the start flag
-
-	// Wait for complete inner frame and footer
-
-	// Read inner frame
-
-	// Read checksum
-
 	// Verify checksum
-
+	if(frame_checksum != received_frame.footer.checksum)
+		return;
+	
+	
 	// Check if we are addressed by this frame
-
+	if(received_frame.header.destAddr != ADDRESS_BROADCAST && received_frame.header.destAddr != serialAdapter_address)
+		return;
+		
 	// Forward to next layer
-
+	serialAdapter_processFrame(&received_frame);
 }
 
 /*!

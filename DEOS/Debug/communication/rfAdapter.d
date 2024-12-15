@@ -25,7 +25,8 @@ communication/rfAdapter.d communication/rfAdapter.o: \
  ../communication/../os_core.h ../communication/../lib/defines.h \
  ../communication/../lib/lcd.h ../communication/../lib/terminal.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h \
- ../communication/../os_scheduler.h ../communication/../os_process.h
+ ../communication/../os_scheduler.h ../communication/../os_process.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h
 
 ../communication/rfAdapter.h:
 
@@ -90,3 +91,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 ../communication/../os_scheduler.h:
 
 ../communication/../os_process.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h:

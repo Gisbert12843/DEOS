@@ -16,6 +16,7 @@
 #define ADDRESS(teamId, subId) ((address_t)((teamId << 3) & 0b11111000) | (subId & 0b00000111))
 #define INITIAL_CHECKSUM_VALUE ((checksum_t)0)
 
+
 //! Unique command IDs
 typedef enum rfAdapterCommand
 {

@@ -15,7 +15,7 @@ c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/..
 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr6\libgcc.a(_umulhisi3.o)
                               os_scheduler.o (__umulhisi3)
 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr6\libc.a(memcpy.o)
-                              communication/xbee.o (memcpy)
+                              communication/rfAdapter.o (memcpy)
 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr6\libc.a(iob.o)
                               lib/lcd.o (__iob)
 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr6\libc.a(printf.o)
@@ -54,23 +54,23 @@ Discarded input sections
  .data          0x00000000        0x0 communication/rfAdapter.o
  .bss           0x00000000        0x0 communication/rfAdapter.o
  .text.rfAdapter_init
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000        0xe communication/rfAdapter.o
  .text.rfAdapter_isInitialized
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000        0x6 communication/rfAdapter.o
  .text.rfAdapter_worker
-                0x00000000        0x2 communication/rfAdapter.o
- .text.serialAdapter_processFrame
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000        0x6 communication/rfAdapter.o
  .text.rfAdapter_receiveSetLed
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000       0x18 communication/rfAdapter.o
  .text.rfAdapter_receiveToggleLed
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000        0x8 communication/rfAdapter.o
  .text.rfAdapter_receiveLcdClear
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000        0x8 communication/rfAdapter.o
  .text.rfAdapter_receiveLcdGoto
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000        0xc communication/rfAdapter.o
  .text.rfAdapter_receiveLcdPrint
-                0x00000000        0x2 communication/rfAdapter.o
+                0x00000000       0x62 communication/rfAdapter.o
+ .text.serialAdapter_processFrame
+                0x00000000       0x60 communication/rfAdapter.o
  .text.rfAdapter_sendSetLed
                 0x00000000        0x2 communication/rfAdapter.o
  .text.rfAdapter_sendToggleLed
@@ -89,15 +89,16 @@ Discarded input sections
                 0x00000000        0x2 communication/rfAdapter.o
  .bss.rfAdapter_initialized
                 0x00000000        0x1 communication/rfAdapter.o
- .debug_info    0x00000000      0x50b communication/rfAdapter.o
- .debug_abbrev  0x00000000       0xff communication/rfAdapter.o
+ .debug_info    0x00000000      0x639 communication/rfAdapter.o
+ .debug_abbrev  0x00000000      0x1e1 communication/rfAdapter.o
+ .debug_loc     0x00000000      0x1c3 communication/rfAdapter.o
  .debug_aranges
                 0x00000000       0x90 communication/rfAdapter.o
  .debug_ranges  0x00000000       0x80 communication/rfAdapter.o
- .debug_line    0x00000000      0x1c1 communication/rfAdapter.o
- .debug_str     0x00000000      0x4a4 communication/rfAdapter.o
+ .debug_line    0x00000000      0x296 communication/rfAdapter.o
+ .debug_str     0x00000000      0x545 communication/rfAdapter.o
  .comment       0x00000000       0x31 communication/rfAdapter.o
- .debug_frame   0x00000000      0x104 communication/rfAdapter.o
+ .debug_frame   0x00000000      0x120 communication/rfAdapter.o
  .text          0x00000000        0x0 communication/serialAdapter.o
  .data          0x00000000        0x0 communication/serialAdapter.o
  .bss           0x00000000        0x0 communication/serialAdapter.o
@@ -116,15 +117,15 @@ Discarded input sections
  .text.serialAdapter_calculateFrameChecksum
                 0x00000000       0x2a communication/serialAdapter.o
  .text.serialAdapter_worker
-                0x00000000      0x174 communication/serialAdapter.o
- .debug_info    0x00000000      0x757 communication/serialAdapter.o
+                0x00000000      0x12a communication/serialAdapter.o
+ .debug_info    0x00000000      0x70a communication/serialAdapter.o
  .debug_abbrev  0x00000000      0x178 communication/serialAdapter.o
- .debug_loc     0x00000000      0x3fb communication/serialAdapter.o
+ .debug_loc     0x00000000      0x3fa communication/serialAdapter.o
  .debug_aranges
                 0x00000000       0x58 communication/serialAdapter.o
  .debug_ranges  0x00000000       0x48 communication/serialAdapter.o
- .debug_line    0x00000000      0x30a communication/serialAdapter.o
- .debug_str     0x00000000      0x4e0 communication/serialAdapter.o
+ .debug_line    0x00000000      0x2f2 communication/serialAdapter.o
+ .debug_str     0x00000000      0x4a0 communication/serialAdapter.o
  .comment       0x00000000       0x31 communication/serialAdapter.o
  .debug_frame   0x00000000      0x114 communication/serialAdapter.o
  .text          0x00000000        0x0 communication/xbee.o
