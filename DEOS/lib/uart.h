@@ -134,7 +134,7 @@ void uart2_flush_blocking();
  *  CDEFS += -DUART_TX_BUFFER_SIZE=nn to your Makefile.
  */
 #ifndef UART2_TX_BUFFER_SIZE
-#define UART2_TX_BUFFER_SIZE 0
+#define UART2_TX_BUFFER_SIZE 64 //für Testtask sonst 0
 #endif
 
 /** @brief  Size of the UART3 circular receive buffer, must be power of 2, and <= 256
@@ -143,7 +143,7 @@ void uart2_flush_blocking();
  *  CDEFS += -DUART_RX_BUFFER_SIZE=nn to your Makefile.
  */
 #ifndef UART3_RX_BUFFER_SIZE
-#define UART3_RX_BUFFER_SIZE 0
+#define UART3_RX_BUFFER_SIZE 64 //für Testtask sonst 0
 #endif
 
 /** @brief  Size of the UART3 circular transmit buffer, must be power of 2, and <= 256

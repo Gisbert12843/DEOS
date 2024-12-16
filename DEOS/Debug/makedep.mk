@@ -32,9 +32,13 @@ os_scheduler.c
 
 os_scheduling_strategies.c
 
+progs\tests\ttConfigXbee.c
+
 progs\tests\ttInit.c
 
 progs\tests\ttMultiple.c
+
+progs\tests\ttProtocolStack.c
 
 progs\tests\ttResume.c
 

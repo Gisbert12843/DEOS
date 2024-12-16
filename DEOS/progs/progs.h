@@ -13,6 +13,8 @@
 
 // Testtasks for exercise 3
 #define TT_COMMUNICATION		30
+#define TT_PROTOCOLSTACK        31
+#define TT_CONIFGXBEE           32
 
 // Testtasks for exercise 4
 #define TT_SENSOR_DATA			40
@@ -29,7 +31,7 @@
 #define USER_PROGRAM	1
 
 // Will run tests/testx.c
-#define TESTTASK TT_SCHEDULING
+#define TESTTASK		TT_PROTOCOLSTACK
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

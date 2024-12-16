@@ -24,9 +24,7 @@
  */
 void xbee_init()
 {
-	#warning [Praktikum 3] Implement here
-	uart1_init(UART_BAUD_SELECT(38400,16000000UL));
-	
+	uart3_init(UART_BAUD_SELECT(38400,16000000UL));
 }
 
 /*!
@@ -36,7 +34,7 @@ void xbee_init()
  */
 void xbee_write(uint8_t byte)
 {
-	uart1_putc(byte);
+	uart3_putc(byte);
 }
 
 /*!
@@ -62,7 +60,7 @@ void xbee_writeData(void *data, uint8_t length)
 uint8_t xbee_read(uint8_t *byte)
 {
 	//we are assuming that "int" from the uart library is implemented as uint16_t, kinda ugly ngl
-	uint16_t temp = (uint16_t)uart1_getc();
+	uint16_t temp = (uint16_t)uart3_getc();
 	
 	switch(((uint8_t)(temp))+1)
 	{
@@ -114,7 +112,7 @@ uint8_t xbee_read(uint8_t *byte)
  */
 uint16_t xbee_getNumberOfBytesReceived()
 {
-	return uart1_getrxcount();
+	return uart3_getrxcount();
 }
 
 /*!

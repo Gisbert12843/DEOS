@@ -48,8 +48,10 @@ void rfAdapter_receiveLcdClear();
  */
 void rfAdapter_init()
 {
+	serialAdapter_init();
 	DDRB |= (1 << PB7);
 	rfAdapter_initialized = true;
+	printf("rfAdapter_init()\n");
 }
 
 /*!
@@ -77,6 +79,9 @@ void rfAdapter_worker()
  */
 void serialAdapter_processFrame(frame_t *frame)
 {
+	printf("serialAdapter_processFrame()\n");
+	printf("\tlength:%d\n", frame->header.length);
+
 	if(frame->header.length > COMM_MAX_PAYLOAD_LENGTH + sizeof(uint8_t) || frame->header.length < sizeof(command_t))
 		return;
 		
@@ -84,14 +89,17 @@ void serialAdapter_processFrame(frame_t *frame)
 	{
 		case CMD_SET_LED:
 		{
+			printf("CMD_SET_LED\n");
 			if(frame->header.length-sizeof(command_t) != sizeof(cmd_setLed_t))
 				return;
 			else
-				rfAdapter_receiveSetLed((cmd_setLed_t*)&(frame->innerFrame.payload));				
+				rfAdapter_receiveSetLed((cmd_setLed_t*)&(frame->innerFrame.payload));		
+		
 		}
 		break;
 		case CMD_TOGGLE_LED:
 		{
+			printf("CMD_TOGGLE_LED\n");
 			if(frame->header.length-sizeof(command_t) != 0)
 				return;
 			else
@@ -101,10 +109,12 @@ void serialAdapter_processFrame(frame_t *frame)
 		
 		case CMD_LCD_CLEAR:
 		{
+			printf("CMD_LCD_CLEAR\n");
 			if(frame->header.length-sizeof(command_t) != 0)
 				return;
 			else
 				rfAdapter_receiveLcdClear();
+
 		}
 		break;
 		
@@ -114,6 +124,8 @@ void serialAdapter_processFrame(frame_t *frame)
 				return;
 			else
 				rfAdapter_receiveLcdGoto((cmd_lcdGoto_t*)&(frame->innerFrame.payload));
+			//printf("CMD_LCD_GOTO\n");
+
 		}
 		break;
 		
@@ -123,6 +135,8 @@ void serialAdapter_processFrame(frame_t *frame)
 				return;
 			else
 				rfAdapter_receiveLcdPrint((cmd_lcdPrint_t*)&(frame->innerFrame.payload));
+			//printf("CMD_LCD_PRINT\n");
+
 		}
 		break;
 
@@ -145,6 +159,7 @@ void serialAdapter_processFrame(frame_t *frame)
  */
 void rfAdapter_receiveSetLed(cmd_setLed_t *data)
 {
+	//printf("rfAdapter_receiveSetLed()");
 	if ((bool)data->enable)
 	{
 		PORTB |= (1 << PB7); //on
@@ -160,6 +175,7 @@ void rfAdapter_receiveSetLed(cmd_setLed_t *data)
  */
 void rfAdapter_receiveToggleLed()
 {
+	//printf("rfAdapter_receiveToggleLed()");
 	PORTB ^= (1 << PB7);
 }
 
@@ -168,6 +184,7 @@ void rfAdapter_receiveToggleLed()
  */
 void rfAdapter_receiveLcdClear()
 {
+	//printf("rfAdapter_receiveLcdClear()");
 	PORTB &= ~(1 << PB7);
 }
 
@@ -178,6 +195,7 @@ void rfAdapter_receiveLcdClear()
  */
 void rfAdapter_receiveLcdGoto(cmd_lcdGoto_t *data)
 {
+	//printf("rfAdapter_receiveLcdGoto()");
 	lcd_goto(data->x,data->y);
 }
 
@@ -188,13 +206,14 @@ void rfAdapter_receiveLcdGoto(cmd_lcdGoto_t *data)
  */
 void rfAdapter_receiveLcdPrint(cmd_lcdPrint_t *data)
 {
+	//printf("rfAdapter_receiveLcdPrint()");
+
 	char buffer[33];
 	if(data->length >32)
 		return;
 	memcpy(&buffer,&(data->message),data->length);
 	buffer[data->length] = '\0';
 	lcd_writeString(&buffer[0]);
-		
 }
 
 /*!
@@ -205,7 +224,13 @@ void rfAdapter_receiveLcdPrint(cmd_lcdPrint_t *data)
  */
 void rfAdapter_sendSetLed(address_t destAddr, bool enable)
 {
+	//printf("rfAdapter_sendSetLed()");
 	
+	inner_frame_t inner_frame;
+	inner_frame.command = CMD_SET_LED;
+	inner_frame.payload[0] = (uint8_t)enable;
+	
+	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);
 }
 
 /*!
@@ -215,7 +240,12 @@ void rfAdapter_sendSetLed(address_t destAddr, bool enable)
  */
 void rfAdapter_sendToggleLed(address_t destAddr)
 {
-	#warning [Praktikum 3] Implement here
+	printf("rfAdapter_sendToggleLed()\n");
+
+	inner_frame_t inner_frame;
+	inner_frame.command = CMD_TOGGLE_LED;
+	
+	serialAdapter_writeFrame(destAddr,sizeof(command_t),&inner_frame);
 }
 
 /*!
@@ -225,7 +255,11 @@ void rfAdapter_sendToggleLed(address_t destAddr)
  */
 void rfAdapter_sendLcdClear(address_t destAddr)
 {
-	#warning [Praktikum 3] Implement here
+	//printf("rfAdapter_sendLcdClear()");
+	inner_frame_t inner_frame;
+	inner_frame.command = CMD_LCD_CLEAR;
+	
+	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);
 }
 
 /*!
@@ -237,8 +271,16 @@ void rfAdapter_sendLcdClear(address_t destAddr)
  */
 void rfAdapter_sendLcdGoto(address_t destAddr, uint8_t x, uint8_t y)
 {
-	#warning [Praktikum 3] Implement here
-}
+	//printf("rfAdapter_sendLcdGoto()");
+	inner_frame_t inner_frame;
+	inner_frame.command = CMD_LCD_GOTO;
+	
+	 cmd_lcdGoto_t cmd;
+	 cmd.x =x;
+	 cmd.y =y;
+	 memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
+	
+	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);}
 
 /*!
  *  Sends a frame with command CMD_LCD_PRINT
@@ -248,7 +290,17 @@ void rfAdapter_sendLcdGoto(address_t destAddr, uint8_t x, uint8_t y)
  */
 void rfAdapter_sendLcdPrint(address_t destAddr, const char *message)
 {
-	#warning [Praktikum 3] Implement here
+	//printf("rfAdapter_sendLcdPrint()");
+	inner_frame_t inner_frame;
+	inner_frame.command = CMD_LCD_PRINT;
+	
+	cmd_lcdPrint_t cmd;
+	cmd.length = strlen(message);
+	memcpy(&cmd.message, &message,cmd.length );
+	
+	memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
+	
+	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);
 }
 
 /*!
@@ -259,5 +311,27 @@ void rfAdapter_sendLcdPrint(address_t destAddr, const char *message)
  */
 void rfAdapter_sendLcdPrintProcMem(address_t destAddr, const char *message)
 {
-	#warning [Praktikum 3] Implement here
+	//printf("rfAdapter_sendLcdPrintProcMem()");
+    inner_frame_t inner_frame;
+    inner_frame.command = CMD_LCD_PRINT;
+
+    cmd_lcdPrint_t cmd;
+
+    // Temporary buffer to hold the string from program memory
+    char buffer[COMM_MAX_PAYLOAD_LENGTH];
+    
+    // Copy the string from program memory to the buffer
+    strncpy_P(buffer, message, sizeof(buffer) - 1);
+    buffer[sizeof(buffer) - 1] = '\0'; // Ensure null termination
+
+    // Populate the command structure
+    cmd.length = strlen(buffer);
+    strncpy(cmd.message, buffer, sizeof(cmd.message) - 1);
+    cmd.message[sizeof(cmd.message) - 1] = '\0'; // Ensure null termination
+
+    // Copy the command structure to the inner frame payload
+    memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
+
+    // Send the frame
+    serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
 }

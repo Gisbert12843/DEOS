@@ -76,6 +76,7 @@ void serialAdapter_waitForAnyByte()
  */
 void serialAdapter_init(void)
 {
+	printf("serialAdapter_init\n");
 	xbee_init();
 }
 
@@ -88,18 +89,20 @@ void serialAdapter_init(void)
  */
 void serialAdapter_writeFrame(address_t destAddr, inner_frame_length_t length, inner_frame_t *innerFrame)
 {
+	printf("serialAdapter_writeFrame()\n");
+	printf("\tinner_length:%d\n", length);
+
 	// Prepare header
 	frame_header_t newHeader;
 	newHeader.destAddr = destAddr;
 	newHeader.length = length;
 	newHeader.srcAddr = serialAdapter_address;
 	newHeader.startFlag = serialAdapter_startFlag;
-	
-	frame_footer_t newFooter;
-	serialAdapter_calculateChecksum(&newFooter.checksum,&newHeader, sizeof(newHeader));
-	serialAdapter_calculateChecksum(&newFooter.checksum,&innerFrame, length);
 
-	
+	frame_footer_t newFooter;
+	serialAdapter_calculateChecksum(&newFooter.checksum, &newHeader, sizeof(newHeader));
+	serialAdapter_calculateChecksum(&newFooter.checksum, &innerFrame, length);
+
 	xbee_writeData(&newHeader, sizeof(newHeader));
 	xbee_writeData(&innerFrame, length);
 	xbee_writeData(&newFooter, sizeof(newFooter));
@@ -117,7 +120,7 @@ bool serialAdapter_waitForData(uint8_t byteCount, time_t frameTimestamp)
 
 	while (xbee_getNumberOfBytesReceived() != byteCount)
 	{
-		if(!serialAdapter_hasTimeout(frameTimestamp,SERIAL_ADAPTER_READ_TIMEOUT_MS))
+		if (!serialAdapter_hasTimeout(frameTimestamp, SERIAL_ADAPTER_READ_TIMEOUT_MS))
 			os_yield();
 		else
 			return false;
@@ -131,65 +134,69 @@ bool serialAdapter_waitForData(uint8_t byteCount, time_t frameTimestamp)
  */
 void serialAdapter_worker()
 {
-	if(!serialAdapter_waitForData(2,getSystemTime_ms()))
+	printf("serialAdapter_worker()\n");
+	if (!serialAdapter_waitForData(2, getSystemTime_ms()))
+	{
+		printf("Timeout1\n");
 		return;
-	
-	
+	}
+
 	// Parse header one by one, abort if first byte is not part of the start flag
 	uint8_t flag_buffer[2];
-	if(xbee_readBuffer( &flag_buffer[0],1) != XBEE_SUCCESS || flag_buffer[0] != (serialAdapter_startFlag & 0xFF))
+	if (xbee_readBuffer(&flag_buffer[0], 1) != XBEE_SUCCESS || flag_buffer[0] != (serialAdapter_startFlag & 0xFF))
 		return;
-	if(xbee_readBuffer(&flag_buffer[1],1) != XBEE_SUCCESS || flag_buffer[1] != ((serialAdapter_startFlag >> 8 ) & 0xFF))
-		return;
-		
-		
-	// Wait for arrival of complete header
-	if (!serialAdapter_waitForData(sizeof(frame_header_t)-(2 * sizeof(uint8_t)) , getSystemTime_ms() ) )
-		return;
-		
-	frame_t received_frame;
-		
-	received_frame.header.startFlag = serialAdapter_startFlag;
-	
-	if (xbee_readBuffer((uint8_t*)&received_frame.header.srcAddr, sizeof(received_frame.header.srcAddr)) != XBEE_SUCCESS)
+	if (xbee_readBuffer(&flag_buffer[1], 1) != XBEE_SUCCESS || flag_buffer[1] != ((serialAdapter_startFlag >> 8) & 0xFF))
 		return;
 
-		
-	if(xbee_readBuffer((uint8_t*)&received_frame.header.destAddr,sizeof(received_frame.header.destAddr)) != XBEE_SUCCESS)
+	// Wait for arrival of complete header
+	if (!serialAdapter_waitForData(sizeof(frame_header_t) - (2 * sizeof(uint8_t)), getSystemTime_ms()))
+	{
+		printf("Timeout2\n");
 		return;
-		
-	if(xbee_readBuffer((uint8_t*)&received_frame.header.length,sizeof(received_frame.header.length)) != XBEE_SUCCESS)
+	}
+	frame_t received_frame;
+
+	received_frame.header.startFlag = serialAdapter_startFlag;
+
+	if (xbee_readBuffer((uint8_t *)&received_frame.header.srcAddr, sizeof(received_frame.header.srcAddr)) != XBEE_SUCCESS)
 		return;
-	
-	if(received_frame.header.length > COMM_MAX_INNER_FRAME_LENGTH)
+
+	if (xbee_readBuffer((uint8_t *)&received_frame.header.destAddr, sizeof(received_frame.header.destAddr)) != XBEE_SUCCESS)
 		return;
-		
+
+	if (xbee_readBuffer((uint8_t *)&received_frame.header.length, sizeof(received_frame.header.length)) != XBEE_SUCCESS)
+		return;
+
+	if (received_frame.header.length > COMM_MAX_INNER_FRAME_LENGTH)
+		return;
+
 	// Wait for complete inner frame and footer
-	if(!serialAdapter_waitForData(received_frame.header.length + sizeof(frame_footer_t),getSystemTime_ms()))
+	if (!serialAdapter_waitForData(received_frame.header.length + sizeof(frame_footer_t), getSystemTime_ms()))
+	{
+		printf("Timeout3\n");
 		return;
-		
-		
+	}
+
 	// Read inner frame
-	if(xbee_readBuffer((uint8_t*)&received_frame.innerFrame,received_frame.header.length) != XBEE_SUCCESS)
+	if (xbee_readBuffer((uint8_t *)&received_frame.innerFrame, received_frame.header.length) != XBEE_SUCCESS)
 		return;
-	
+
 	// Read footer
-	if(xbee_readBuffer((uint8_t*)&received_frame.footer,sizeof(frame_footer_t)) != XBEE_SUCCESS)
+	if (xbee_readBuffer((uint8_t *)&received_frame.footer, sizeof(frame_footer_t)) != XBEE_SUCCESS)
 		return;
-	
+
 	// Read checksum
 	checksum_t frame_checksum;
-	serialAdapter_calculateFrameChecksum(&frame_checksum,&received_frame);
-	
+	serialAdapter_calculateFrameChecksum(&frame_checksum, &received_frame);
+
 	// Verify checksum
-	if(frame_checksum != received_frame.footer.checksum)
+	if (frame_checksum != received_frame.footer.checksum)
 		return;
-	
-	
+
 	// Check if we are addressed by this frame
-	if(received_frame.header.destAddr != ADDRESS_BROADCAST && received_frame.header.destAddr != serialAdapter_address)
+	if (received_frame.header.destAddr != ADDRESS_BROADCAST && received_frame.header.destAddr != serialAdapter_address)
 		return;
-		
+
 	// Forward to next layer
 	serialAdapter_processFrame(&received_frame);
 }
@@ -203,9 +210,9 @@ void serialAdapter_worker()
  */
 void serialAdapter_calculateChecksum(checksum_t *checksum, void *data, uint8_t length)
 {
-	for(uint8_t i = 0; i<length;i++ )
+	for (uint8_t i = 0; i < length; i++)
 	{
-		*checksum ^= ((uint8_t*)data)[i];
+		*checksum ^= ((uint8_t *)data)[i];
 	}
 }
 
@@ -217,6 +224,6 @@ void serialAdapter_calculateChecksum(checksum_t *checksum, void *data, uint8_t l
  */
 void serialAdapter_calculateFrameChecksum(checksum_t *checksum, frame_t *frame)
 {
-	serialAdapter_calculateChecksum(checksum,&frame->header,sizeof(frame_header_t));
-	serialAdapter_calculateChecksum(checksum,&frame->innerFrame,frame->header.length);
+	serialAdapter_calculateChecksum(checksum, &frame->header, sizeof(frame_header_t));
+	serialAdapter_calculateChecksum(checksum, &frame->innerFrame, frame->header.length);
 }

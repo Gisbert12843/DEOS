@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/wwwgi/sciebo/Projects/Distributed_Systems_Prak/DEOS_NEW/DEOS",
-      "program": "c:/Users/wwwgi/sciebo/Projects/Distributed_Systems_Prak/DEOS_NEW/DEOS/build/Debug/outDebug",
+      "cwd": "c:/Users/wwwgi/sciebo/Projects/Distributed_Systems_Prak/DEOS/DEOS",
+      "program": "c:/Users/wwwgi/sciebo/Projects/Distributed_Systems_Prak/DEOS/DEOS/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

@@ -59,8 +59,10 @@ C_SRCS +=  \
 ../os_process.c \
 ../os_scheduler.c \
 ../os_scheduling_strategies.c \
+../progs/tests/ttConfigXbee.c \
 ../progs/tests/ttInit.c \
 ../progs/tests/ttMultiple.c \
+../progs/tests/ttProtocolStack.c \
 ../progs/tests/ttResume.c \
 ../progs/tests/ttScheduling.c \
 ../progs/tests/ttStackConsistency.c \
@@ -98,8 +100,10 @@ os_core.o \
 os_process.o \
 os_scheduler.o \
 os_scheduling_strategies.o \
+progs/tests/ttConfigXbee.o \
 progs/tests/ttInit.o \
 progs/tests/ttMultiple.o \
+progs/tests/ttProtocolStack.o \
 progs/tests/ttResume.o \
 progs/tests/ttScheduling.o \
 progs/tests/ttStackConsistency.o \
@@ -130,8 +134,10 @@ os_core.o \
 os_process.o \
 os_scheduler.o \
 os_scheduling_strategies.o \
+progs/tests/ttConfigXbee.o \
 progs/tests/ttInit.o \
 progs/tests/ttMultiple.o \
+progs/tests/ttProtocolStack.o \
 progs/tests/ttResume.o \
 progs/tests/ttScheduling.o \
 progs/tests/ttStackConsistency.o \
@@ -162,8 +168,10 @@ os_core.d \
 os_process.d \
 os_scheduler.d \
 os_scheduling_strategies.d \
+progs/tests/ttConfigXbee.d \
 progs/tests/ttInit.d \
 progs/tests/ttMultiple.d \
+progs/tests/ttProtocolStack.d \
 progs/tests/ttResume.d \
 progs/tests/ttScheduling.d \
 progs/tests/ttStackConsistency.d \
@@ -194,8 +202,10 @@ os_core.d \
 os_process.d \
 os_scheduler.d \
 os_scheduling_strategies.d \
+progs/tests/ttConfigXbee.d \
 progs/tests/ttInit.d \
 progs/tests/ttMultiple.d \
+progs/tests/ttProtocolStack.d \
 progs/tests/ttResume.d \
 progs/tests/ttScheduling.d \
 progs/tests/ttStackConsistency.d \
@@ -329,6 +339,13 @@ lib/util.o: ../lib/util.c
 	@echo Finished building: $<
 	
 
+progs/tests/ttConfigXbee.o: ../progs/tests/ttConfigXbee.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 progs/tests/ttInit.o: ../progs/tests/ttInit.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
@@ -337,6 +354,13 @@ progs/tests/ttInit.o: ../progs/tests/ttInit.c
 	
 
 progs/tests/ttMultiple.o: ../progs/tests/ttMultiple.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+progs/tests/ttProtocolStack.o: ../progs/tests/ttProtocolStack.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

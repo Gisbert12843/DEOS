@@ -237,10 +237,16 @@
     <Compile Include="progs\progs.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="progs\tests\ttConfigXbee.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="progs\tests\ttInit.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="progs\tests\ttMultiple.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="progs\tests\ttProtocolStack.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="progs\tests\ttResume.c">
