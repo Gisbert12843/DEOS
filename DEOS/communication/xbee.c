@@ -62,7 +62,7 @@ uint8_t xbee_read(uint8_t *byte)
 	//we are assuming that "int" from the uart library is implemented as uint16_t, kinda ugly ngl
 	uint16_t temp = (uint16_t)uart3_getc();
 	
-	switch(((uint8_t)(temp))+1)
+	switch((temp >> 8) & 0xFF)
 	{
 		case 0:
 		{
@@ -99,7 +99,6 @@ uint8_t xbee_read(uint8_t *byte)
 		default:
 			break;
 	}
-	
 	return 255;
 }
 
@@ -125,14 +124,15 @@ uint16_t xbee_getNumberOfBytesReceived()
 uint8_t xbee_readBuffer(uint8_t *buffer, uint8_t length)
 {
 	if (xbee_getNumberOfBytesReceived() < length)
-	return XBEE_DATA_MISSING;
+		return XBEE_DATA_MISSING;
 
 	uint8_t temp_buff[length];
 	
-	for (uint8_t i = 0; i < length; i++) {
+	for (uint8_t i = 0; i < length; i++)
+	{
 		uint8_t err = xbee_read(&temp_buff[i]);
 		if (err != XBEE_SUCCESS)
-		return err; // Early return if an error occurs
+			return err; // Early return if an error occurs
 	}
 
 	// Copy received data into destination buffer

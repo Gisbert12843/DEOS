@@ -75,7 +75,8 @@ C_SRCS +=  \
 ../progs/tests/ttIsrBenchmark.c \
 ../progs/user_programs/user_prog1.c \
 ../progs/user_programs/user_prog2.c \
-../progs/user_programs/user_prog3.c
+../progs/user_programs/user_prog3.c \
+../progs/user_programs/user_prog4.c
 
 
 PREPROCESSING_SRCS += 
@@ -116,7 +117,8 @@ progs/tests/ttTlcd.o \
 progs/tests/ttIsrBenchmark.o \
 progs/user_programs/user_prog1.o \
 progs/user_programs/user_prog2.o \
-progs/user_programs/user_prog3.o
+progs/user_programs/user_prog3.o \
+progs/user_programs/user_prog4.o
 
 OBJS_AS_ARGS +=  \
 communication/rfAdapter.o \
@@ -150,7 +152,8 @@ progs/tests/ttTlcd.o \
 progs/tests/ttIsrBenchmark.o \
 progs/user_programs/user_prog1.o \
 progs/user_programs/user_prog2.o \
-progs/user_programs/user_prog3.o
+progs/user_programs/user_prog3.o \
+progs/user_programs/user_prog4.o
 
 C_DEPS +=  \
 communication/rfAdapter.d \
@@ -184,7 +187,8 @@ progs/tests/ttTlcd.d \
 progs/tests/ttIsrBenchmark.d \
 progs/user_programs/user_prog1.d \
 progs/user_programs/user_prog2.d \
-progs/user_programs/user_prog3.d
+progs/user_programs/user_prog3.d \
+progs/user_programs/user_prog4.d
 
 C_DEPS_AS_ARGS +=  \
 communication/rfAdapter.d \
@@ -218,7 +222,8 @@ progs/tests/ttTlcd.d \
 progs/tests/ttIsrBenchmark.d \
 progs/user_programs/user_prog1.d \
 progs/user_programs/user_prog2.d \
-progs/user_programs/user_prog3.d
+progs/user_programs/user_prog3.d \
+progs/user_programs/user_prog4.d
 
 OUTPUT_FILE_PATH +=DEOS.elf
 
@@ -452,6 +457,13 @@ progs/user_programs/user_prog2.o: ../progs/user_programs/user_prog2.c
 	
 
 progs/user_programs/user_prog3.o: ../progs/user_programs/user_prog3.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+progs/user_programs/user_prog4.o: ../progs/user_programs/user_prog4.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DF_CPU=16000000UL  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

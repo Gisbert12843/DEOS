@@ -288,6 +288,9 @@
     <Compile Include="progs\user_programs\user_prog3.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="progs\user_programs\user_prog4.c">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="communication" />

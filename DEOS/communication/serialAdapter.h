@@ -79,9 +79,11 @@ void serialAdapter_worker(void);
 void serialAdapter_writeFrame(address_t destAddr, inner_frame_length_t length, inner_frame_t *innerFrame);
 
 //! Blocks process until byteCount bytes arrived
-bool serialAdapter_waitForData(uint8_t byteCount, time_t frameTimestamp);
+bool serialAdapter_waitForData(uint16_t byteCount, time_t frameTimestamp);
 
 //! Blocks process until at least one byte can be read from input buffer
 void serialAdapter_waitForAnyByte();
+
+void printFrame(frame_t *frame, char* func_name);
 
 #endif /* SERIAL_ADAPTER_H_ */

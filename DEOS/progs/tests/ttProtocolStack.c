@@ -26,6 +26,7 @@ void displayCounter(int i);
 PROGRAM(1, AUTOSTART)
 {
     rfAdapter_init();
+
 #if PHASE_1 == 1
     /*!
      * Sending Toggle LED to Board Address
@@ -39,7 +40,7 @@ PROGRAM(1, AUTOSTART)
     for (int i = 15; i > 0; --i) {
         displayCounter(i);
         rfAdapter_sendToggleLed(serialAdapter_address);
-        delayMs(1000);
+        delayMs(3000);
     }
 
 #endif
@@ -58,7 +59,7 @@ PROGRAM(1, AUTOSTART)
     rfAdapter_sendSetLed(serialAdapter_address, 1);
     for (int i = 10; i > 0; --i) {
         displayCounter(i);
-        delayMs(1000);
+        delayMs(3000);
     }
 
     //! LED off for 10 seconds and display Countdown

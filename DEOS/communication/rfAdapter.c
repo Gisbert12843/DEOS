@@ -51,7 +51,6 @@ void rfAdapter_init()
 	serialAdapter_init();
 	DDRB |= (1 << PB7);
 	rfAdapter_initialized = true;
-	printf("rfAdapter_init()\n");
 }
 
 /*!
@@ -79,78 +78,79 @@ void rfAdapter_worker()
  */
 void serialAdapter_processFrame(frame_t *frame)
 {
-	printf("serialAdapter_processFrame()\n");
-	printf("\tlength:%d\n", frame->header.length);
 
-	if(frame->header.length > COMM_MAX_PAYLOAD_LENGTH + sizeof(uint8_t) || frame->header.length < sizeof(command_t))
-		return;
-		
-	switch(frame->innerFrame.command)
+	if (frame->header.length > COMM_MAX_PAYLOAD_LENGTH + sizeof(uint8_t) || frame->header.length < sizeof(command_t))
 	{
-		case CMD_SET_LED:
-		{
-			printf("CMD_SET_LED\n");
-			if(frame->header.length-sizeof(command_t) != sizeof(cmd_setLed_t))
-				return;
-			else
-				rfAdapter_receiveSetLed((cmd_setLed_t*)&(frame->innerFrame.payload));		
-		
-		}
-		break;
-		case CMD_TOGGLE_LED:
-		{
-			printf("CMD_TOGGLE_LED\n");
-			if(frame->header.length-sizeof(command_t) != 0)
-				return;
-			else
-				rfAdapter_receiveToggleLed();
-		}
-		break;
-		
-		case CMD_LCD_CLEAR:
-		{
-			printf("CMD_LCD_CLEAR\n");
-			if(frame->header.length-sizeof(command_t) != 0)
-				return;
-			else
-				rfAdapter_receiveLcdClear();
+		return;
+	}
 
-		}
-		break;
-		
-		case CMD_LCD_GOTO:
-		{
-			if(frame->header.length-sizeof(command_t) != sizeof(cmd_lcdGoto_t))
-				return;
-			else
-				rfAdapter_receiveLcdGoto((cmd_lcdGoto_t*)&(frame->innerFrame.payload));
-			//printf("CMD_LCD_GOTO\n");
 
-		}
-		break;
-		
-		case CMD_LCD_PRINT:
+	switch (frame->innerFrame.command)
+	{
+	case CMD_SET_LED:
+	{
+		if (frame->header.length - sizeof(command_t) != sizeof(cmd_setLed_t))
 		{
-			if(frame->header.length-sizeof(command_t) != sizeof(cmd_lcdPrint_t))
-				return;
-			else
-				rfAdapter_receiveLcdPrint((cmd_lcdPrint_t*)&(frame->innerFrame.payload));
-			//printf("CMD_LCD_PRINT\n");
-
+			return;
 		}
-		break;
-
-		case CMD_SENSOR_DATA:
+		else
+			rfAdapter_receiveSetLed((cmd_setLed_t *)&(frame->innerFrame.payload));
+	}
+	break;
+	case CMD_TOGGLE_LED:
+	{
+		if (frame->header.length - sizeof(command_t) != 0)
 		{
-			#warning TODO!!!
+			return;
 		}
-		break;
-		
-		default: return;
+		else
+			rfAdapter_receiveToggleLed();
+	}
+	break;
+
+	case CMD_LCD_CLEAR:
+	{
+		if (frame->header.length - sizeof(command_t) != 0)
+		{
+			return;
+		}
+		else
+			rfAdapter_receiveLcdClear();
+	}
+	break;
+
+	case CMD_LCD_GOTO:
+	{
+		if (frame->header.length - sizeof(command_t) != sizeof(cmd_lcdGoto_t))
+		{
+			return;
+		}
+		else
+			rfAdapter_receiveLcdGoto((cmd_lcdGoto_t *)&(frame->innerFrame.payload));
+	}
+	break;
+
+	case CMD_LCD_PRINT:
+	{
+		if (frame->header.length - sizeof(command_t) != sizeof(cmd_lcdPrint_t))
+		{
+			return;
+		}
+		else
+			rfAdapter_receiveLcdPrint((cmd_lcdPrint_t *)&(frame->innerFrame.payload));
+	}
+	break;
+
+	case CMD_SENSOR_DATA:
+	{
+#warning TODO!!!
+	}
+	break;
+
+	default:
+		return;
 	}
 }
-
-
 
 /*!
  *  Handler that's called when command CMD_SET_LED was received
@@ -159,14 +159,14 @@ void serialAdapter_processFrame(frame_t *frame)
  */
 void rfAdapter_receiveSetLed(cmd_setLed_t *data)
 {
-	//printf("rfAdapter_receiveSetLed()");
+	// printf("rfAdapter_receiveSetLed()");
 	if ((bool)data->enable)
 	{
-		PORTB |= (1 << PB7); //on
+		PORTB |= (1 << PB7); // on
 	}
 	else
 	{
-		PORTB &= ~(1 << PB7); //off
+		PORTB &= ~(1 << PB7); // off
 	}
 }
 
@@ -175,7 +175,7 @@ void rfAdapter_receiveSetLed(cmd_setLed_t *data)
  */
 void rfAdapter_receiveToggleLed()
 {
-	//printf("rfAdapter_receiveToggleLed()");
+	// printf("rfAdapter_receiveToggleLed()");
 	PORTB ^= (1 << PB7);
 }
 
@@ -184,7 +184,7 @@ void rfAdapter_receiveToggleLed()
  */
 void rfAdapter_receiveLcdClear()
 {
-	//printf("rfAdapter_receiveLcdClear()");
+	// printf("rfAdapter_receiveLcdClear()");
 	PORTB &= ~(1 << PB7);
 }
 
@@ -195,8 +195,8 @@ void rfAdapter_receiveLcdClear()
  */
 void rfAdapter_receiveLcdGoto(cmd_lcdGoto_t *data)
 {
-	//printf("rfAdapter_receiveLcdGoto()");
-	lcd_goto(data->x,data->y);
+	// printf("rfAdapter_receiveLcdGoto()");
+	lcd_goto(data->x, data->y);
 }
 
 /*!
@@ -206,12 +206,12 @@ void rfAdapter_receiveLcdGoto(cmd_lcdGoto_t *data)
  */
 void rfAdapter_receiveLcdPrint(cmd_lcdPrint_t *data)
 {
-	//printf("rfAdapter_receiveLcdPrint()");
+	// printf("rfAdapter_receiveLcdPrint()");
 
 	char buffer[33];
-	if(data->length >32)
+	if (data->length > 32)
 		return;
-	memcpy(&buffer,&(data->message),data->length);
+	memcpy(&buffer, &(data->message), data->length);
 	buffer[data->length] = '\0';
 	lcd_writeString(&buffer[0]);
 }
@@ -224,13 +224,13 @@ void rfAdapter_receiveLcdPrint(cmd_lcdPrint_t *data)
  */
 void rfAdapter_sendSetLed(address_t destAddr, bool enable)
 {
-	//printf("rfAdapter_sendSetLed()");
-	
+	// printf("rfAdapter_sendSetLed()");
+
 	inner_frame_t inner_frame;
 	inner_frame.command = CMD_SET_LED;
 	inner_frame.payload[0] = (uint8_t)enable;
-	
-	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);
+
+	serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
 }
 
 /*!
@@ -240,12 +240,10 @@ void rfAdapter_sendSetLed(address_t destAddr, bool enable)
  */
 void rfAdapter_sendToggleLed(address_t destAddr)
 {
-	printf("rfAdapter_sendToggleLed()\n");
-
 	inner_frame_t inner_frame;
 	inner_frame.command = CMD_TOGGLE_LED;
-	
-	serialAdapter_writeFrame(destAddr,sizeof(command_t),&inner_frame);
+
+	serialAdapter_writeFrame(destAddr, sizeof(command_t), &inner_frame);
 }
 
 /*!
@@ -255,11 +253,11 @@ void rfAdapter_sendToggleLed(address_t destAddr)
  */
 void rfAdapter_sendLcdClear(address_t destAddr)
 {
-	//printf("rfAdapter_sendLcdClear()");
+	// printf("rfAdapter_sendLcdClear()");
 	inner_frame_t inner_frame;
 	inner_frame.command = CMD_LCD_CLEAR;
-	
-	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);
+
+	serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
 }
 
 /*!
@@ -271,16 +269,17 @@ void rfAdapter_sendLcdClear(address_t destAddr)
  */
 void rfAdapter_sendLcdGoto(address_t destAddr, uint8_t x, uint8_t y)
 {
-	//printf("rfAdapter_sendLcdGoto()");
+	// printf("rfAdapter_sendLcdGoto()");
 	inner_frame_t inner_frame;
 	inner_frame.command = CMD_LCD_GOTO;
-	
-	 cmd_lcdGoto_t cmd;
-	 cmd.x =x;
-	 cmd.y =y;
-	 memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
-	
-	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);}
+
+	cmd_lcdGoto_t cmd;
+	cmd.x = x;
+	cmd.y = y;
+	memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
+
+	serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
+}
 
 /*!
  *  Sends a frame with command CMD_LCD_PRINT
@@ -290,17 +289,17 @@ void rfAdapter_sendLcdGoto(address_t destAddr, uint8_t x, uint8_t y)
  */
 void rfAdapter_sendLcdPrint(address_t destAddr, const char *message)
 {
-	//printf("rfAdapter_sendLcdPrint()");
+	// printf("rfAdapter_sendLcdPrint()");
 	inner_frame_t inner_frame;
 	inner_frame.command = CMD_LCD_PRINT;
-	
+
 	cmd_lcdPrint_t cmd;
 	cmd.length = strlen(message);
-	memcpy(&cmd.message, &message,cmd.length );
-	
+	memcpy(&cmd.message, &message, cmd.length);
+
 	memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
-	
-	serialAdapter_writeFrame(destAddr,sizeof(inner_frame),&inner_frame);
+
+	serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
 }
 
 /*!
@@ -311,27 +310,27 @@ void rfAdapter_sendLcdPrint(address_t destAddr, const char *message)
  */
 void rfAdapter_sendLcdPrintProcMem(address_t destAddr, const char *message)
 {
-	//printf("rfAdapter_sendLcdPrintProcMem()");
-    inner_frame_t inner_frame;
-    inner_frame.command = CMD_LCD_PRINT;
+	// printf("rfAdapter_sendLcdPrintProcMem()");
+	inner_frame_t inner_frame;
+	inner_frame.command = CMD_LCD_PRINT;
 
-    cmd_lcdPrint_t cmd;
+	cmd_lcdPrint_t cmd;
 
-    // Temporary buffer to hold the string from program memory
-    char buffer[COMM_MAX_PAYLOAD_LENGTH];
-    
-    // Copy the string from program memory to the buffer
-    strncpy_P(buffer, message, sizeof(buffer) - 1);
-    buffer[sizeof(buffer) - 1] = '\0'; // Ensure null termination
+	// Temporary buffer to hold the string from program memory
+	char buffer[COMM_MAX_PAYLOAD_LENGTH];
 
-    // Populate the command structure
-    cmd.length = strlen(buffer);
-    strncpy(cmd.message, buffer, sizeof(cmd.message) - 1);
-    cmd.message[sizeof(cmd.message) - 1] = '\0'; // Ensure null termination
+	// Copy the string from program memory to the buffer
+	strncpy_P(buffer, message, sizeof(buffer) - 1);
+	buffer[sizeof(buffer) - 1] = '\0'; // Ensure null termination
 
-    // Copy the command structure to the inner frame payload
-    memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
+	// Populate the command structure
+	cmd.length = strlen(buffer);
+	strncpy(cmd.message, buffer, sizeof(cmd.message) - 1);
+	cmd.message[sizeof(cmd.message) - 1] = '\0'; // Ensure null termination
 
-    // Send the frame
-    serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
+	// Copy the command structure to the inner frame payload
+	memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
+
+	// Send the frame
+	serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
 }

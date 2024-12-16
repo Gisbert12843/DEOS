@@ -28,7 +28,7 @@
 #define ENABLE_TESTTASK	1
 
 // Will run user_progs/user_progx.c if ENABLE_TESTTASK is set to 0
-#define USER_PROGRAM	1
+#define USER_PROGRAM	4
 
 // Will run tests/testx.c
 #define TESTTASK		TT_PROTOCOLSTACK
