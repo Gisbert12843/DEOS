@@ -133,7 +133,7 @@ void serialAdapter_processFrame(frame_t *frame)
 	{
 		if (frame->header.length - sizeof(command_t) != sizeof(cmd_lcdGoto_t))
 		{
-			printf_P(PSTR("Invalid length for CMD_LCD_GOTO. Length wo command is %d instead of %d\n"), frame->header.length - sizeof(command_t), sizeof(cmd_lcdGoto_t));
+			printf_P(PSTR("Invalid length for CMD_LCD_GOTO. Length w/o command is %d instead of %d\n"), frame->header.length - sizeof(command_t), sizeof(cmd_lcdGoto_t));
 			return;
 		}
 		else
@@ -146,13 +146,15 @@ void serialAdapter_processFrame(frame_t *frame)
 
 	case CMD_LCD_PRINT:
 	{
-		if (frame->header.length - sizeof(command_t) != sizeof(cmd_lcdPrint_t))
+		if (frame->header.length - sizeof(command_t) > sizeof(cmd_lcdPrint_t))
 		{
+			printf_P(PSTR("Invalid length for CMD_LCD_PRINT. Length w/o command is %d instead of %d\n"), frame->header.length - sizeof(command_t), sizeof(cmd_lcdPrint_t));
 			return;
 		}
 		else
 		{
 			printf_P(PSTR("Printing to LCD: %s\n"), ((cmd_lcdPrint_t *)&(frame->innerFrame.payload))->message);
+
 			rfAdapter_receiveLcdPrint((cmd_lcdPrint_t *)&(frame->innerFrame.payload));
 		}
 	}
@@ -320,7 +322,6 @@ void rfAdapter_sendLcdGoto(address_t destAddr, uint8_t x, uint8_t y)
  */
 void rfAdapter_sendLcdPrint(address_t destAddr, const char *message)
 {
-	// printf("rfAdapter_sendLcdPrint()");
 	inner_frame_t inner_frame;
 	inner_frame.command = CMD_LCD_PRINT;
 

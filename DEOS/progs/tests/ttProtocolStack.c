@@ -37,7 +37,7 @@ PROGRAM(1, AUTOSTART)
     lcd_writeProgString(PSTR("Onboard LED"));
 
     //! Toggle for 15 seconds and display Countdown
-    for (int i = 15; i > 0; --i) {
+    for (int i = 6; i > 0; --i) {
         displayCounter(i);
         rfAdapter_sendToggleLed(serialAdapter_address);
         delayMs(1000);
@@ -132,7 +132,7 @@ PROGRAM(1, AUTOSTART)
     uint8_t length = sizeof(data);
 
     //! Write directly to UART
-    xbee_writeData(&data, length);
+    xbee_writeData(data, length);
 
     delayMs(2000);
 

@@ -192,9 +192,6 @@ void serialAdapter_worker()
 	}
 
 
-
-
-
 	if (received_frame.header.length > COMM_MAX_INNER_FRAME_LENGTH)
 		return;
 
