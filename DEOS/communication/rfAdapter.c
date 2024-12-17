@@ -133,6 +133,7 @@ void serialAdapter_processFrame(frame_t *frame)
 	{
 		if (frame->header.length - sizeof(command_t) != sizeof(cmd_lcdGoto_t))
 		{
+			printf_P(PSTR("Invalid length for CMD_LCD_GOTO. Length wo command is %d instead of %d\n"), frame->header.length - sizeof(command_t), sizeof(cmd_lcdGoto_t));
 			return;
 		}
 		else
@@ -304,7 +305,7 @@ void rfAdapter_sendLcdGoto(address_t destAddr, uint8_t x, uint8_t y)
 	cmd.y = y;
 	memcpy(&inner_frame.payload, &cmd, sizeof(cmd));
 
-	int size = sizeof(sizeof(command_t) + sizeof(cmd_lcdGoto_t));
+	int size = sizeof(command_t) + sizeof(cmd_lcdGoto_t);
 
 	printf("rfAdapter_sendLcdGoto() with size: %d\n", size);
 
@@ -351,8 +352,19 @@ void rfAdapter_sendLcdPrintProcMem(address_t destAddr, const char *message)
 	inner_frame_t inner_frame;
 	inner_frame.command = CMD_LCD_PRINT;
 
-	printf("rfAdapter_sendLcdPrintProcMem() with size: %d\n", sizeof(inner_frame));
+	cmd_lcdPrint_t cmd;
+	cmd.length = strlen_P((PGM_P)message);
+	if (cmd.length > 32)
+		cmd.length = 32;
 
-	// Send the frame
-	serialAdapter_writeFrame(destAddr, sizeof(inner_frame), &inner_frame);
+	strncpy_P(cmd.message, message, cmd.length);
+	cmd.message[cmd.length] = '\0';
+
+	memcpy(inner_frame.payload, &cmd, sizeof(cmd));
+
+	int size = sizeof(command_t) + sizeof(cmd_lcdPrint_t);
+
+	printf("rfAdapter_sendLcdPrint() with size: %d\n", size);
+
+	serialAdapter_writeFrame(destAddr, size, &inner_frame);
 }
