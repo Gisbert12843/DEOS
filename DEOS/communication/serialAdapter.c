@@ -155,13 +155,12 @@ void serialAdapter_worker()
 		return;
 	}
 
-	if (flag_buffer[0] != (serialAdapter_startFlag & 0xFF))
-		return;
-	if (flag_buffer[1] != ((serialAdapter_startFlag >> 8) & 0xFF))
-		return;
-
+	for(int i=0; i< sizeof(start_flag_t);i++)
+	{
+		if(flag_buffer[i] != ((serialAdapter_startFlag >> 8*i) & 0xFF)) return;
+	}
+	
 	// Wait for arrival of complete header
-
 	if (!serialAdapter_waitForData(sizeof(frame_header_t) - (sizeof(start_flag_t)), getSystemTime_ms()))
 	{
 		return;

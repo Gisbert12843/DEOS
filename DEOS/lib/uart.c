@@ -1379,6 +1379,8 @@ void uart3_putc(unsigned char data)
 
     /* enable UDRE interrupt */
     UART3_CONTROL    |= _BV(UART3_UDRIE);
+	
+	
 
 }/* uart3_putc */
 

@@ -288,7 +288,12 @@ void rfAdapter_sendLcdClear(address_t destAddr)
 	printf("rfAdapter_sendLcdClear() with size: %d\n", size);
 
 	serialAdapter_writeFrame(destAddr,size, &inner_frame);
+	
+	printf_P(PSTR(""));
+	
+	
 }
+
 
 /*!
  *  Sends a frame with command CMD_LCD_GOTO
