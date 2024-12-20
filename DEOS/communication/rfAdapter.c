@@ -146,10 +146,16 @@ void serialAdapter_processFrame(frame_t *frame)
 
 	case CMD_LCD_PRINT:
 	{
+		cmd_lcdPrint_t toprnt = *(cmd_lcdPrint_t*)&(frame->innerFrame.payload);
+		
 		if (frame->header.length - sizeof(command_t) > sizeof(cmd_lcdPrint_t))
 		{
 			printf_P(PSTR("Invalid length for CMD_LCD_PRINT. Length w/o command is %d instead of %d\n"), frame->header.length - sizeof(command_t), sizeof(cmd_lcdPrint_t));
 			return;
+		}
+		else if((*(cmd_lcdPrint_t*)&(frame->innerFrame.payload)).length != frame->header.length - sizeof(command_t) - sizeof((*(cmd_lcdPrint_t*)&(frame->innerFrame.payload)).length))
+		{
+			printf_P(PSTR("Invalid length for CMD_LCD_PRINT. Length of expected String is not equal to length described in cmd_lcdPrint_t object\n"), frame->header.length - sizeof(command_t), sizeof(cmd_lcdPrint_t));
 		}
 		else
 		{

@@ -24,7 +24,7 @@
  */
 void xbee_init()
 {
-	uart3_init(UART_BAUD_SELECT(38400,16000000UL));
+	uart1_init(UART_BAUD_SELECT(38400, F_CPU));
 }
 
 /*!
@@ -34,7 +34,7 @@ void xbee_init()
  */
 void xbee_write(uint8_t byte)
 {
-	uart3_putc(byte);
+	uart1_putc(byte);
 }
 
 /*!
@@ -60,7 +60,7 @@ void xbee_writeData(void *data, uint8_t length)
 uint8_t xbee_read(uint8_t *byte)
 {
 	//we are assuming that "int" from the uart library is implemented as uint16_t, kinda ugly ngl
-	uint16_t temp = (uint16_t)uart3_getc();
+	uint16_t temp = (uint16_t)uart1_getc();
 	
 	switch((temp >> 8) & 0xFF)
 	{
@@ -111,7 +111,7 @@ uint8_t xbee_read(uint8_t *byte)
  */
 uint16_t xbee_getNumberOfBytesReceived()
 {
-	return uart3_getrxcount();
+	return uart1_getrxcount();
 }
 
 /*!
@@ -125,18 +125,14 @@ uint8_t xbee_readBuffer(uint8_t *buffer, uint8_t length)
 {
 	if (xbee_getNumberOfBytesReceived() < length)
 		return XBEE_DATA_MISSING;
-
-	uint8_t temp_buff[length];
 	
 	for (uint8_t i = 0; i < length; i++)
 	{
-		uint8_t err = xbee_read(&temp_buff[i]);
+		// Copy received data into destination buffer
+		uint8_t err = xbee_read(&buffer[i]);
 		if (err != XBEE_SUCCESS)
 			return err; // Early return if an error occurs
 	}
-
-	// Copy received data into destination buffer
-	memcpy(buffer, temp_buff, length);
 
 	return XBEE_SUCCESS;
 }

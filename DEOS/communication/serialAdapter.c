@@ -99,14 +99,12 @@ void serialAdapter_writeFrame(address_t destAddr, inner_frame_length_t length, i
 
 	newFrame.footer.checksum = INITIAL_CHECKSUM_VALUE;
 
-	newFrame.header = newFrame.header;
 	newFrame.innerFrame = *innerFrame;
-	newFrame.footer = newFrame.footer;
 
 	serialAdapter_calculateFrameChecksum(&newFrame.footer.checksum, &newFrame);
 
 	xbee_writeData(&newFrame.header, sizeof(newFrame.header));
-	xbee_writeData(innerFrame, length);
+	xbee_writeData(&newFrame.innerFrame, length);
 	xbee_writeData(&newFrame.footer, sizeof(newFrame.footer));
 }
 
@@ -150,13 +148,16 @@ void serialAdapter_worker()
 	{
 		return;
 	}
+	
+	if (flag_buffer[0] != (serialAdapter_startFlag & 0xFF))
+		return;
+		
 	if (xbee_readBuffer(&flag_buffer[1], 1) != XBEE_SUCCESS)
 	{
 		return;
 	}
 
-	if (flag_buffer[0] != (serialAdapter_startFlag & 0xFF))
-		return;
+
 	if (flag_buffer[1] != ((serialAdapter_startFlag >> 8) & 0xFF))
 		return;
 
