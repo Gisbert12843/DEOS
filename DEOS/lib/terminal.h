@@ -15,7 +15,7 @@
 #ifdef DEBUG
 #undef DEBUG
 #endif
-#define DEBUG(str, ...) terminal_log_printf_p(PSTR("[DEBUG] "), PSTR(str), ##__VA_ARGS__) // You could use __LINE__ or __FILE__ to include line number or file name in the log message
+#define DEBUG(str, ...) terminal_log_printf_p(PSTR(""), PSTR(str), ##__VA_ARGS__) // You could use __LINE__ or __FILE__ to include line number or file name in the log message
 
 //! Initialize the terminal
 void terminal_init();
@@ -39,18 +39,18 @@ void terminal_writeDec(uint16_t number);
 void terminal_writeChar(char character);
 
 //! Draw string on usb terminal
-void terminal_writeString(char *str);
+void terminal_writeString(char* str);
 
 //! Write char PROGMEM* string
-void terminal_writeProgString(const char *pstr);
+void terminal_writeProgString(const char* pstr);
 
 //! Write char PROGMEM* string, with indentation after each \n, unless it's the last one
-void terminal_writeIndentedProgString(const char *pstr);
+void terminal_writeIndentedProgString(const char* pstr);
 
 //! Write a new line
 void terminal_newLine();
 
 //! Write a formatted string to the terminal with a prefix
-void terminal_log_printf_p(const char *prefix, const char *fmt, ...);
+void terminal_log_printf_p(const char* prefix, const char* fmt, ...);
 
 #endif /* TERMINAL_H_ */

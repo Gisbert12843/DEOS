@@ -23,9 +23,12 @@
 PROGRAM(1, AUTOSTART)
 {
 	rfAdapter_init();
+	int i = 0;
 	while (1)
 	{
+		printf("worker %d\n", i);
 		rfAdapter_worker();
+		i++;
 	}
 }
 
@@ -36,6 +39,7 @@ PROGRAM(2, AUTOSTART)
 	while (1)
 	{
 		buttons_waitForPressed(BTN_LEFT);
+		printf_P(PSTR("PROGRAM2\n"));
 		rfAdapter_sendLcdClear(PARTNER_ADDRESS);
 		rfAdapter_sendLcdPrintProcMem(PARTNER_ADDRESS, PSTR("Hallo "));
 		rfAdapter_sendSetLed(PARTNER_ADDRESS, true);
@@ -52,9 +56,10 @@ PROGRAM(3, AUTOSTART)
 	while (1)
 	{
 		buttons_waitForPressed(BTN_RIGHT);
-		rfAdapter_sendLcdPrintProcMem(PARTNER_ADDRESS, PSTR("DEOS"));
-		rfAdapter_sendSetLed(PARTNER_ADDRESS, true);
+		printf_P(PSTR("PROGRAM3\n"));
+		rfAdapter_sendLcdPrint(PARTNER_ADDRESS, "DEOS");
 		lcd_writeChar('>');
+		rfAdapter_sendSetLed(PARTNER_ADDRESS, true);
 
 		buttons_waitForReleased(BTN_RIGHT);
 		rfAdapter_sendSetLed(PARTNER_ADDRESS, false);

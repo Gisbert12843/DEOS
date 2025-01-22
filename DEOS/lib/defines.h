@@ -42,7 +42,7 @@
 #define DEFAULT_PRIORITY OS_PRIO_LOW
 
 //! Standard scheduling strategy for the OS
-#define INITIAL_SCHEDULING_STRATEGY OS_SS_ROUND_ROBIN
+#define INITIAL_SCHEDULING_STRATEGY OS_SS_DYNAMIC_PRIORITY_ROUND_ROBIN
 
 //! Default delay to read display values (in ms)
 #define DEFAULT_OUTPUT_DELAY 100
@@ -62,7 +62,7 @@
 //----------------------------------------------------------------------------
 
 //! Offset needed before the Stack starts, because global variables are put on the low addresses of the SRAM
-#define STACK_OFFSET 1000
+#define STACK_OFFSET 1400
 
 //! The stack size available for initialization and globals
 #define STACK_SIZE_MAIN 32

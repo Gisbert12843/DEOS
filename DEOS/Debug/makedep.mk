@@ -8,6 +8,12 @@ communication\serialAdapter.c
 
 communication\xbee.c
 
+gui\gui.c
+
+gui\gui_helper.c
+
+i2c\i2cmaster.c
+
 lib\buttons.c
 
 lib\lcd.c
@@ -60,6 +66,8 @@ progs\tests\ttTlcd.c
 
 progs\tests\ttIsrBenchmark.c
 
+progs\user_programs\display_prog5.c
+
 progs\user_programs\user_prog1.c
 
 progs\user_programs\user_prog2.c
@@ -67,4 +75,14 @@ progs\user_programs\user_prog2.c
 progs\user_programs\user_prog3.c
 
 progs\user_programs\user_prog4.c
+
+spi\spi.c
+
+tlcd\tlcd_button.c
+
+tlcd\tlcd_core.c
+
+tlcd\tlcd_event_parser.c
+
+tlcd\tlcd_graphic.c
 

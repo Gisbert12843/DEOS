@@ -59,6 +59,25 @@
   "files.associations": {
     "progs.h": "c",
     "os_process.h": "c",
-    "rfadapter.h": "c"
-  }
+    "rfadapter.h": "c",
+    "os_scheduler.h": "c",
+    "gui_helper.h": "c",
+    "stdbool.h": "c",
+    "pgmspace.h": "c",
+    "io.h": "c",
+    "gui.h": "c",
+    "string.h": "c",
+    "os_core.h": "c",
+    "serialadapter.h": "c",
+    "lcd.h": "c",
+    "util.h": "c",
+    "tlcd_graphic.h": "c",
+    "tlcd_core.h": "c",
+    "spi.h": "c",
+    "stdlib.h": "c",
+    "stdint.h": "c"
+  },
+  "C_Cpp.default.compilerPath": "c:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gcc.exe",
+  "C_Cpp.vcFormat.indent.caseLabels": true,
+  "C_Cpp.formatting": "vcFormat"
 }
